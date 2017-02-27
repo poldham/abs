@@ -1,6 +1,6 @@
 name: "my-website"
 navbar:
-  title: "Handbook on ABS Monitoring"
+  title: "ABS Monitoring"
   left:
     - text: "Introduction"
       href: index.html
