@@ -1,0 +1,10 @@
+base
+RDocumentation
+dplyr
+readr
+tidyr
+stringr
+lensr
+ggplot2
+plotly
+leaflet

@@ -1,0 +1,389 @@
+---
+title: "Accessing the Global Biodiversity Information Facility with rgbif"
+author: "Paul Oldham"
+output: 
+  html_document:
+    toc: true
+    depth: 3
+    toc_float: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, cache = TRUE, tidy = TRUE, options(scipen = 1, digits = 2))
+```
+
+### Introduction
+
+In this article we will look at how to obtain taxonomic and geographic occurrence data from [the Global Biodiversity Information Facility (GBIF)](http://www.gbif.org/). Our purpose is to use GBIF data as part of a wider model for monitoring access and benefit-sharing (ABS) under the [Nagoya Protocol](https://www.cbd.int/abs/about/). You can read about the wider model [here](http://oneworldanalytics.com/abspermits/). However, our focus in this article will be on the basics of accessing and working with GBIF data.   
+
+One of the challenges in monitoring biodiversity in general is gaining data on the species that are known to exist within a country. GBIF plays a key role in providing access to taxonomic data about a country and can easily be downloaded using either the [GBIF website](http://www.gbif.org/) or using the [API](http://www.gbif.org/developer/summary) and packages such as [`rgbif`](https://github.com/ropensci/rgbif) from [rOpenSci](https://ropensci.org/) in R with [RStudio](https://www.rstudio.com/). 
+
+In this walk through we will focus on downloading and processing GBIF records to do three things: 
+
+1. Generate quick summaries of the available data about species within a country. 
+2. Create a species name list that can be used for searching and text mining with other databases as part of ABS monitoring. 
+3. Create a species occurrence table with latitude and longitude coordinates for use in the creation of interactive maps.  
+
+This walk through will use Kenya as the example and is intended to support implementation of monitoring under the Nagoya Protocol in Kenya and elsewhere. This article does not go into the details of cleaning up species occurrence records in GBIF but the [`rgbif` vignette on cleaning](https://github.com/ropensci/rgbif/blob/master/vignettes/issues_vignette.Rmd) and issues with [taxonomic names](https://github.com/ropensci/rgbif/blob/master/vignettes/taxonomic_names.Rmd) can help you with that. 
+
+### Retrieving Data from GBIF
+
+GBIF data is made available in either simple .csv form or in the more detailed [Darwin Core format](http://www.gbif.org/resource/80636). Here we will focus on the use of the simple .csv format that can easily be used in a range of software packages. 
+
+We can readily retrieve data from GBIF by visiting the website and creating a free account. 
+
+![](/Users/pauloldham17inch/Desktop/open_source_master/abs/images/gbif/gbif_front.png)
+
+Signup or sign in for a free account.
+
+![](/Users/pauloldham17inch/Desktop/open_source_master/abs/images/gbif/gbif_account.png)
+
+When you have signed up for an account you will be able to generate datasets that can be downloaded with the information that you need, either directly from GBIF, over email, or using packages such as `rgbif`.
+
+For country records use the data drop down to select a country
+
+![](/Users/pauloldham17inch/Desktop/open_source_master/abs/images/gbif/gbif_2.png)
+
+
+In this case we will select Kenya (a GBIF member).
+
+![](/Users/pauloldham17inch/Desktop/open_source_master/abs/images/gbif/gbif_country.png)
+
+When we open up the Kenya country page we will see the following. 
+
+![](/Users/pauloldham17inch/Desktop/open_source_master/abs/images/gbif/kenya_page.png)
+
+We can see from this that there are 703,192 occurrence records for Kenya (the main way in which GBIF data is organised). If we click on the hyperlinked `703,192 records` we will be able to download the results. Unless you want the .pdf country report do not click the big blue button. 
+
+### Downloading GBIF Results
+
+Downloading GBIF results is a multi-step process. 
+
+![](/Users/pauloldham17inch/Desktop/open_source_master/abs/images/gbif/kenya_occurrences.png)
+
+Note that 700,161 records are available from the amount quoted on the front page. When we press on the download occurrences button in the image above, GBIF will start preparing a dataset. This takes varying amounts of time depending on the size of the dataset. When the data preparation is complete an email will be sent with a URL for the link to your account to download the dataset.
+
+You can either download the dataset directly and open it in Excel, Open Office or other software such as Tableau. Alternatively, if using RStudio you can import it into R using the `rgbif` package as follows with thanks to [Scott Chamberlain from rOpenSci](https://ropensci.org/about/) for enabling easy .csv import in `rgbif`.
+
+Install the package.
+
+```{r install_rgbif, eval=FALSE}
+install.packages("rgbif")
+```
+
+Load the library. 
+
+```{r load_rgbif}
+library(rgbif)
+```
+
+In this we will use the Kenya dataset above with 700,168 records from January 2017. The dataset has the following `doi` for citation: [doi:10.15468/dl.b04fyt](http://www.gbif.org/occurrence/download/0054538-160910150852091). The URL contains the ID for the dataset [http://www.gbif.org/occurrence/download/0054538-160910150852091](http://www.gbif.org/occurrence/download/0054538-160910150852091) and we will be needing the ID 0054538-160910150852091
+
+If using RStudio the most efficient way to import data is to use `rgbif` and download and import the data directly in one step as follows. Note that GBIF .csv files include a large number of blank cells. The final line converts these to NA for Not Available. This will generate a message that we are not going to worry about. 
+
+```{r devtools_ver, eval=FALSE, echo=FALSE}
+devtools::install_github("ropensci/rgbif")
+```
+
+```{r occ_download, eval=FALSE}
+library(rgbif)
+library(dplyr)
+kenya_gbif <- occ_download_get(key="0054538-160910150852091", overwrite = TRUE) %>% occ_download_import(kenya_gbif_download, na.strings = c("", NA))
+```
+```{r save_kenya_gbif, echo=FALSE, eval=FALSE}
+save(kenya_gbif, file = "kenya_gbif.rda")
+```
+
+In the unlikely event that you experience problems you could simply download, unzip and then read in the file using the `readr` package or `data.table::fread()` (as used in `rgbif` above). Note that there are a significant number of empty cells in GBIF data as well as NA cells. The easiest way to deal with this is to convert the empty cells to NA at the time of import. 
+
+```{r readr, eval=FALSE}
+kenya_gbif_readr <- readr::read_delim("pathtofile", delim = "\t", escape_double = FALSE, col_names = TRUE, na = c("", "NA"))
+
+```
+
+Note that for reasons that are presently unclear, `readr` drops a small number of rows from the expected results. As an alternative use `fread()` from the `data.table` package (the arguments to `fread()` are available in `occ_download_import()` in `rgbif` so you really shouldn't need to do that). This is most likely to be useful if you experience problems with a particular file and want to figure that out. 
+
+```{r fread, eval=FALSE, cache=TRUE}
+library(data.table)
+kenya_gbif_fread <- fread("pathtofile", na.strings = c("", NA))
+```
+
+### Reviewing GBIF Data
+
+We will use the `dplyr` package to work with the data. If you do not have the `dplyr` package in R then download and install the `tidyverse` which combines the main data wrangling packages we will be using in one place. 
+
+```{r install_tidy, eval=FALSE}
+install.packages("tidyverse")
+```
+
+The tidyverse consists of a set of core packages, including `dplyr` and `tidyr` that are typically used whenever you are working with data while other packages, such as `stringr` for manipulating strings, are also installed but not automatically loaded. When you have installed `tidyverse`, load the `dplyr` package. 
+
+```{r tidyverse, message=FALSE, warning=FALSE}
+library(tidyverse)
+```
+
+We now have a dataset with 700,168 rows and 44 columns. 
+
+One important feature of GBIF data is that the rows include different taxonranks such as Kingdom, Family, Genus and Species. This means that when we summarise the data, we need to ensure that we have selected the right category of data. 
+
+We can quickly summarise the number of occurrences by kingdom using the `dplyr` package. 
+
+```{r kingdom_sum}
+library(tidyverse)
+load("data/kenya_gbif.rda")
+kenya_gbif %>% 
+  drop_na(kingdom) %>% 
+  count(kingdom, sort = TRUE)
+```
+
+The value of `n` is the number of occurrence records in the dataset by kingdom and should not be confused with the number of species. 
+
+We can count the number of occurrence records for each species as follows. Note that we filter the taxonrank column to select species. 
+
+```{r species_sum}
+library(tidyverse)
+kenya_gbif %>% 
+  filter(taxonrank == "SPECIES") %>% 
+  count(species) %>%
+  arrange(desc(n))
+```
+
+We can see that the top species in terms of occurrence records is a bird __Pycnonotus barbatus__, the common bulbul. This provides us with a clue that there are a large number of observation records for birds in GBIF data. 
+
+To get a quick overview of the number of occurrence records by taxonrank we can simply change the count to count by taxonrank. This is not very exciting except perhaps to note the occurrence records for species, subspecies and variety.
+
+```{r sum_taxonrank}
+library(tidyverse)
+kenya_gbif %>% count(taxonrank)
+```
+
+If we are interested in mapping the data later on (and we are) we will probably want to get a grip on the species occurrence records for birds to check whether the dataset is flooded with bird observation data. Again we can do this quite easily. 
+
+```{r}
+library(tidyverse)
+kenya_gbif %>% count(class, sort = TRUE) %>%
+  drop_na(class) %>% 
+  filter(n > 3000) %>% 
+  ggplot(aes(x = reorder(class, n), y = n, fill = class)) +
+  geom_bar(stat = "identity", show.legend = FALSE) +
+  labs(x = "Class of Organism", y = "Number of Occurrence Records (observations)") +
+  coord_flip() 
+```
+
+Ah... so that means `r 416835 / 700168 * 100`% of our occurrence records for Kenya are for birds. While we have nothing against birds, this means that if we map the data later on the map will be flooded with Animalia data points for birds. We won't do anything about this for the time being except that we could exclude all records using `dplyr` filter to show us all records that are not (`!=`) birds as summarised below.  
+
+```{r}
+library(dplyr)
+kenya_gbif %>% filter(class != "Aves") %>% count(class, sort = TRUE)
+```
+
+We could save this to a new table with 277,681 occurrence records as follows.
+
+```{r}
+library(dplyr)
+not_birds <- filter(kenya_gbif, class != "Aves")
+```
+
+We can also obtain an idea of who is providing taxonomic information about Kenya in the dataset through the institution code:
+
+```{r}
+library(dplyr)
+kenya_gbif %>% count(institutioncode, sort = TRUE)
+```
+
+The interpretation of these institution codes requires further work (and an institution code may not be unique), so this is not very helpful at the moment. 
+
+Other pieces of information that we might find useful are the locality (for text mining and matching with services such as [geonames](http://www.geonames.org/) using [tidy text mining](http://tidytextmining.com/)). Note that this data is pretty messy and would require extensive work to clean up. For that reason at present we do not propose to go further with this. 
+
+```{r}
+library(dplyr)
+kenya_gbif %>% count(locality)
+```
+
+We can also gain a limited insight into trends in the recording of occurrence data for Kenya through the year field. We will use the `ggplot2` package and `plotly` to draw a line graph that will display the values on hover. Records date back to 1758 but are sparse and have been limited to 1900 onwards while a total of 318 records were recorded in 2016 producing a data cliff and so we limit the data to 2015. Note that the overall year data is sparse with 99,000 occurrence records lacking a corresponding year. 
+
+```{r}
+library(tidyverse)
+library(plotly)
+kenya_gbif %>% 
+  drop_na(year) %>% 
+  count(year) %>% 
+  ggplot(aes(x = year, y = n, group = 1)) +
+  xlim(1900, 2015) +
+  geom_line() -> out
+plotly::ggplotly(out)
+```
+
+While the data is limited, this graph suggest that GBIF occurrence records is entered in bursts of activity.
+
+Understanding the structure of the occurrence data from GBIF is important for three reasons. 
+
+1. Occurrence data contains records for the occurrences of species which means, as we saw above, that there will be multiple records for the same species name. We will often want to summarise this data down to the species, kingdom, family, genus etc. for further work. 
+
+2. When engaging in monitoring activity we will typically want to generate geographic maps with the occurrence data where we will need latitude and longitude coordinates. Higher order taxonranks such as genera, families, order etc. do not logically have coordinates. So we will want to filter the data to only those records that have coordinates (species). In practice that means that we will want a data table with each of the species level coordinates along possibly with subspecies and variety data (not included below). 
+
+3. If we attempt to map the data, the map may be flooded by data for species that have high frequency observation records... notably birds. Depending on our purposes we may want to either include or exclude this data.  
+
+To do that we will now create two main tables:
+
+1. One for species
+2. One for species occurrences
+
+### Creating a Species Table
+
+For the species table we will want to reduce the records to one record per species. 
+
+This is straightforward. We start by filtering the rows with the species taxonrank and then deduplicate using `distinct()`. Note that this could probably be done more directly by applying distinct without filtering first but produced lower results.
+
+```{r distinct_species}
+library(tidyverse)
+kenya_species <- kenya_gbif %>% 
+  filter(taxonrank == "SPECIES") %>%
+  distinct(species, .keep_all = TRUE)
+kenya_species
+```
+
+```{r save_kenya_species_distinct, eval=FALSE, echo=FALSE}
+save(kenya_species, file = "data/kenya_species_distinct.rda")
+```
+
+This approach has the advantage (by specifying `.keep_all = TRUE`) of keeping one example of the associated kingdom and other data per occurrence record. Note however that in some instances GBIF may record the same species in different genera, families or kingdoms. So, bear this in mind if you suddenly discover that a plant is recorded as an animal. 
+
+If we simply wanted a list of unique species names we could change the `.keep_all` to FALSE (the default).
+
+```{r species_only}
+library(tidyverse)
+kenya_species_only <- kenya_gbif %>% 
+  filter(taxonrank == "SPECIES") %>%
+  distinct(species, .keep_all = FALSE)
+kenya_species_only
+```
+
+Note that when the table is deduplicated by occurrence it will retain one occurrence record per name. As this is not meaningful and could create confusion it probably makes sense to drop many of the columns. 
+
+An easy way to drop columns is to use the `dplyr` `select()` function. By default `select()` will drop columns that are not named. Here, for illustration only, we would keep columns 1 and 4 to 14 and drop the rest.  
+
+```{r select, eval=FALSE}
+library(tidyverse)
+kenya_species %>% 
+  select(1, 4:14)
+```
+
+Dropping columns that contain incomplete information can help you to avoid using inaccurate data. In other cases, the species table can be regarded as containing sample occurrence data (one per species) and that might be useful for small scale testing (for example for mapping tests). You can find a file of this type in data as `kenya_species_distinct.rda` and a file with just the species names as `kenya_species`.
+
+```{r kenya_species_distinct, eval=FALSE, echo=FALSE}
+save(kenya_species_only, file="data/kenya_species.rda")
+```
+
+We can now take a quick look at the numbers of species by kingdom.
+
+```{r count_species_kingdom}
+library(dplyr)
+kenya_species %>% 
+  drop_na(kingdom) %>% 
+  count(kingdom, sort = TRUE) %>% 
+  ggplot(aes(x = reorder(kingdom, n), y = n, fill = kingdom)) +
+  geom_bar(stat = "identity", show.legend = FALSE) +
+  labs(x = "Kingdom", y = "Number of Species") +
+  coord_flip() 
+```
+
+We have seen above that the Kenya occurrence records are dominated by observations of birds. Using our species table let's take a quick look at classes of organism by numbers of species. We will limit the data to those classes containing more than 50 species.
+
+```{r count_species}
+library(dplyr)
+kenya_species %>% 
+  drop_na(class) %>% 
+  count(class, sort = TRUE) %>% 
+  filter(n > 50) %>% 
+  ggplot(aes(x = reorder(class, n), y = n, fill = class)) +
+  geom_bar(stat = "identity", show.legend = FALSE) +
+  labs(x = "Class", y = "Number of Species") +
+  coord_flip() 
+```
+
+As we can see, for Kenya the highest number of species are a class of flowering plants followed by insects. While responsible for nearly 60% of the occurrence records, birds rank fifth in counts of numbers of species.
+
+The creation of a species table creates a basis for monitoring through the use of the species names in search queries or for text mining the scientific literature and patent literature. 
+
+There are 18,131 species names in this dataset. We might also want to generate a genus names list as a shorter list for use in queries or text mining. 
+
+```{r rank_genus}
+library(dplyr)
+library(tidyr)
+kenya_genus <- kenya_species %>%  
+  drop_na(genus) %>% 
+  count(genus, sort = TRUE)
+kenya_genus
+```
+
+This reveals that there are `r nrow(kenya_genus)` in the species data with Euphorbia ranking top . 
+
+### Creating an Occurrence Table
+
+Having created a species table we now need an occurrence table. In this case we want the species records and the coordinates per record. Note that we may also be interested in occurrence records for subspecies and varities although we will focus only on species here. 
+
+```{r occ_filter}
+library(dplyr)
+kenya_occurrence <- kenya_gbif %>% 
+  filter(taxonrank == "SPECIES")
+```
+
+When we come to map the data later on we will discover that not all species records have latitude and longitude records and some are incorrect. This will result in errors when we attempt to map the data with `leaflet` or another mapping package such as `ggmap`. 
+
+We can test for NA values in the `decimallatitude` column using `is.na()`.
+
+```{r na_test}
+library(dplyr)
+is.na(kenya_occurrence$decimallatitude) %>% head(100)
+```
+
+To address this we need to remove records with incomplete latitude or longitude. In this case we can use the very easy `drop_na()` function from `tidyr`. This will reduce our species occurrence dataset from `r nrow(kenya_occurrence)` rows to 444,228. Note that in this dataset there appear to be no cases where there are NA rows in longitude that are not also in latitude. We will however, anticipate that possibility in the code below.
+
+```{r drop_na}
+library(tidyr)
+kenya_occurrence <- kenya_occurrence %>% 
+  drop_na(decimallatitude) %>% 
+  drop_na(decimallongitude)
+kenya_occurrence
+```
+
+### GBIF Issues
+
+GBIF data contains an issue column that lists known issues with the data.
+
+```{r issue}
+library(dplyr)
+kenya_occurrence %>% select(issue) %>% head()
+```
+
+These issues may matter to you for a variety of reasons. When mapping GBIF data pay particular attention to the GEODETIC issue notes. 
+
+A vignette on [cleaning up GBIF data](https://github.com/ropensci/rgbif/blob/master/vignettes/issues_vignette.Rmd) is provided with the `rgbif` package and it is recommended reading. 
+
+To View the GBIF issues table run `gbif_issues()` or view the web page [here](http://gbif.github.io/gbif-api/apidocs/org/gbif/api/vocabulary/OccurrenceIssue.html)
+
+```{r gbif_issues}
+library(rgbif)
+gbif_issues()
+```
+
+A common issue with GBIF occurrences is that the World Geodetic System (WGS84) reference coordinates are assumed. 
+
+We will deal with coordinate issues in the discussion of mapping GBIF data. 
+
+### Round Up
+
+GBIF is a powerful tool for obtaining taxonomic information about biodiversity in a country or a region. GBIF data is available as either a simple .csv file or as Darwin Core format records. In this walk through we have focused on the simple .csv data. That data can be easily be processed to generate species lists with known occurrences in a country, summary data and occurrence tables with coordinates for mapping. 
+
+It is important to bear in mind that GBIF data is inevitably incomplete and depends on contributions from GBIF contributors within and outside a country. However, for monitoring purposes under the Nagoya Protocol it is the single most accessible database for information about biodiversity. As such it is critically important. 
+
+In this walk through we started with a raw dataset of 700,168 records. We then did three things. 
+
+1. We generated quick summaries of the data
+1. We filtered the data to create a species list with known occurrences in Kenya. 
+2. We filtered the occurrence records to data containing coordinates. 
+
+It is important to emphasise that there are a variety of other important data fields such as those containing ids (allowing for the creation of links to wider records) and fields such as the locality which could be used in mapping or text mining. It is also possible to do a lot more with the `rgbif` package  and related `taxize` package than we have covered in this walk through.
+
+In the next article we will map the `gbif` occurrence data using the `leaflet` javascript library to generate an interactive map. 

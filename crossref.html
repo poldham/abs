@@ -1,0 +1,831 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+
+<meta name="author" content="Paul Oldham" />
+
+
+<title>Accessing the Scientific Literature with CrossRef</title>
+
+<script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/bootstrap.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="site_libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
+<link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<link href="site_libs/highlightjs-1.1/default.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-1.1/highlight.js"></script>
+<script src="site_libs/htmlwidgets-0.8/htmlwidgets.js"></script>
+<link href="site_libs/plotlyjs-1.16.3/plotly-htmlwidgets.css" rel="stylesheet" />
+<script src="site_libs/plotlyjs-1.16.3/plotly-latest.min.js"></script>
+<script src="site_libs/plotly-binding-4.5.6/plotly.js"></script>
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs && document.readyState && document.readyState === "complete") {
+   window.setTimeout(function() {
+      hljs.initHighlighting();
+   }, 0);
+}
+</script>
+
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+
+</head>
+
+<body>
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+  height: auto;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+</style>
+
+
+<style type="text/css">
+/* padding for bootstrap navbar */
+body {
+  padding-top: 51px;
+  padding-bottom: 40px;
+}
+/* offset scroll position for anchor links (for fixed navbar)  */
+.section h1 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+
+.section h2 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h3 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h4 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h5 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h6 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+</style>
+
+<script>
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark it active
+  menuAnchor.parent().addClass('active');
+
+  // if it's got a parent navbar menu mark it active as well
+  menuAnchor.closest('li.dropdown').addClass('active');
+});
+</script>
+
+
+<div class="container-fluid main-container">
+
+<!-- tabsets -->
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+</script>
+
+<!-- code folding -->
+
+
+
+
+<script>
+$(document).ready(function ()  {
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_').toLowerCase();
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+  padding-left: 25px;
+  text-indent: 0;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row-fluid">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">Handbook on ABS Monitoring</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">Introduction</a>
+</li>
+<li>
+  <a href="gettingstarted.html">Getting Started</a>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    Working with Taxonomic Data
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="gbif.html">Accessing GBIF</a>
+    </li>
+    <li>
+      <a href="mapgbif.html">Mapping GBIF Data</a>
+    </li>
+  </ul>
+</li>
+<li>
+  <a href="crossref.html">Accessing Scientific Literature</a>
+</li>
+<li>
+  <a href="geonames.html">Mapping with Geonames</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div class="fluid-row" id="header">
+
+
+
+<h1 class="title toc-ignore">Accessing the Scientific Literature with CrossRef</h1>
+<h4 class="author"><em>Paul Oldham</em></h4>
+
+</div>
+
+
+<!--- review permits data in light of cleaning of underlying data fields on NA values. UPDATE THE PERMITS DATA IN LIGHT OF CLEANING--->
+<div id="introduction" class="section level3">
+<h3>Introduction</h3>
+<p>This article discusses the use of the free web service <a href="https://www.crossref.org/">CrossRef</a> to access the scientific literature. We will use data for Kenya as the example with the aim of exploring the issues involved in linking administrative data on research permits with scientific publications in Kenya. The wider context of the discussion is the monitoring of access and benefit-sharing agreements for research involving genetic resources and traditional knowledge under the <a href="https://www.cbd.int/abs/about/">Nagoya Protocol</a>.</p>
+<p>There are two significant challenges involved in linking research permit data with the scientific literature.</p>
+<ol style="list-style-type: decimal">
+<li>Accessing the scientific literature at scale.</li>
+<li>Accurately identifying research permit holder names within the scientific literature (name disambiguation).</li>
+</ol>
+<p>The first of these challenges reflects the issue that the scientific literature is dispersed in a range of databases. These databases are typically pay per view and difficult to access without payment to a commercial service provider such as Clarivate Analytics (for Web of Science) or Elsevier (for Scopus).</p>
+<p>This situation is beginning to change as a result of the rise of the open access movement. The majority of published scientific research is publicly funded. In response to growing concerns about the costs of access to the outputs of publicly funded research a growing number of governments, including the European Union, have introduced open access requirements. Typically, this involves a requirement to make a copy of a pre-peer review version of an article available in an open access repository. In addition, government funding agencies have increasingly provided extra resources for researchers to pay scientific publishing companies a fee to make a peer-reviewed article open access.</p>
+<p>The rise of open access has been accompanied by the growing availability of web services (Application Programming Interfaces or APIs) that provide access to metadata about publications. Typically, metadata includes the title, author names, authors affiliations, subject areas, document identifiers (dois) and in some cases the abstract, author keywords and links to access the full text either free of charge or through payment of a fee to a publisher. Examples of publication databases with APIs include PubMed and CrossRef.</p>
+<p>The rise of APIs has also been accompanied by the creation of libraries in a variety of programming languages that allow metadata to be searched and downloaded for analysis. An emerging trend is the use of web services for text mining of metadata. In this section we will use the <a href="https://github.com/ropensci/rcrossref">rcrossref</a> package in R and RStudio developed by <a href="https://ropensci.org/">rOpenSci</a> to provide access to the CrossRef database of metadata on 80 million publications.</p>
+<p>While will focus on the CrossRef API using the <code>rcrossref</code> package we would note the availability of other packages, notably the <code>fulltext</code> package to access API data from PubMed, Entrez, PLOS and others. In the process we will identify some of the strengths and weaknesses of APIs for linking administrative information such as research permits with publication data.</p>
+<p>We will explore the use of the CrossRef API using a general search for literature involving Kenya. Note here that we do not focus on individual searches for author names using <code>rcrossref</code> (such as the <code>cr_works()</code> function) in order to focus on the second challenge of mapping names from administrative data into the scientific literature. This challenge has two dimensions.</p>
+<ol style="list-style-type: decimal">
+<li>The problem of variations in author names (such as the use of initials or the presence or absence of first and second names), known within the wider literature as splits<a href="http://journals.plos.org/plosone/article?id=10.1371/journal.pone.0070299">refs</a>.</li>
+<li>The problem of shared names where the name of a researchers (e.g. John Smith) is shared by multiple other persons. This is known within the wider literature as the problem of lumped names or simply, lumps <a href="(http://journals.plos.org/plosone/article?id=10.1371/journal.pone.0070299)">refs</a>.</li>
+</ol>
+<p>In the first part of this article we will access the scientific literature for Kenya using R. In the second part of the article we will look at the problem of name cleaning and the use of Vantage Point for matching names. In the next article we will explore the use of ORCID researcher identifiers as a means for automating the linkages between adminsitrative data on research permits and publications.</p>
+</div>
+<div id="about-crossref" class="section level3">
+<h3>About CrossRef</h3>
+<p><a href="https://www.crossref.org/">CrossRef</a> is a non-profit organisation that serves as a clearing house for publishers for the use of digital object identifiers (dois) as persistent identifiers for scientific publications. CrossRef is not a database of scientific publications but can be best understood as a coordinating body or clearing-house for the consistent use of persistent identifiers for <a href="https://en.wikipedia.org/wiki/Crossref">a reported 2000 publishing organisations</a> that are members of CrossRef. Further information on CrossRef is available <a href="http://www.crossref.org/01company/16fastfacts.html">here</a></p>
+<p>CrossRef data on scientific publications essentially consists of three elements</p>
+<ol style="list-style-type: decimal">
+<li>Metadata about a publication</li>
+<li>A URL link to the article</li>
+<li>A document identifier (doi)</li>
+</ol>
+<p>At present CrossRef contains information on 80 million scientific publications including articles, books and book chapters.</p>
+<div class="figure">
+<img src="images/crossref/crossref_front_kenya.png" />
+
+</div>
+<p>Data can be accessed using the <a href="https://github.com/CrossRef/rest-api-doc/blob/master/rest_api.md">crossref api</a> and from a variety of platforms including the <a href="https://github.com/ropensci/rcrossref">rOpenSci rcrossref package</a> in R.</p>
+</div>
+<div id="searching-crossref" class="section level3">
+<h3>Searching crossref</h3>
+<p>It should be emphasised that CrossRef is not a text based search engine. CrossRef mainly provides metadata based on document identifiers - that is document identifiers are sent to it and standardised information is sent back. However, it is possible to perform very simple text searches in the CrossRef database.</p>
+<p>In the image above we included the term Kenya in the search box. When we enter this we see the following results.</p>
+<div class="figure">
+<img src="images/crossref/crossref_kenya_results.png" />
+
+</div>
+<p>What we see here is that there are 27,299 results in total including 23,770 articles and 2,312 book chapters among other resources that possess a persistent identifier. CrossRef also records information on the Year, the Journal, the Category for subjects and the Publisher and Funder Name (not shown).</p>
+<p>We can immediately see that some of this information is relevant to ABS monitoring such as the Title, the journal and the Category (e.g. Ecology, Evolution, Behaviour and Systematics or Parasitology).</p>
+<p>The <a href="https://github.com/CrossRef/rest-api-doc/blob/master/rest_api.md">test search function</a> in CrossRef API is based on a limited set of DisMax query terms (notably +/-). Thus if we wanted to limit the above search to Kenya and Lakes we would use the term <code>+kenya +lakes</code>)</p>
+<div class="figure">
+<img src="images/crossref/kenya_plus_lakes.png" />
+
+</div>
+<p>This radically reduces the number of results by forcing the search to return records that contain the term Kenya AND lakes.</p>
+<p>We can also exclude terms by using a query such as <code>kenya !lakes</code> which returns 27,180 results that do not contain the term lakes.</p>
+<div class="figure">
+<img src="images/crossref/kenya_minus_lakes.png" />
+
+</div>
+<p>However, our ability to conduct these types of searches using the API is presently limited. For example, the author of this report found no way of reproducing an AND query with the API for Kenya and lakes. It may be that there is a route for such queries, that this is not available with the API or that there is a bug in the API code.</p>
+<p>For example, the following queries all produce the same results, 60506 from the API and, regardless of the setting, are returning the results of Kenya OR Lakes.</p>
+<p><a href="http://api.CrossRef.org/works?query=kenya%20+lakes">http://api.CrossRef.org/works?query=kenya%20+lakes</a> <a href="http://api.CrossRef.org/works?query=+kenya%20+lakes">http://api.CrossRef.org/works?query=+kenya%20+lakes</a> <a href="http://api.CrossRef.org/works?query=kenya++lakes" class="uri">http://api.CrossRef.org/works?query=kenya++lakes</a> <a href="http://api.CrossRef.org/works?query=+kenya++lakes" class="uri">http://api.CrossRef.org/works?query=+kenya++lakes</a> <a href="http://api.CrossRef.org/works?query=kenya+-lakes" class="uri">http://api.CrossRef.org/works?query=kenya+-lakes</a> <a href="http://api.CrossRef.org/works?query=kenya+!lakes" class="uri">http://api.CrossRef.org/works?query=kenya+!lakes</a></p>
+<p>Therefore, we need to bear in mind that what can be achieved with the website query is not necessarily achievable using the API.</p>
+</div>
+<div id="the-crossref-api" class="section level3">
+<h3>The crossref API</h3>
+<p>To use the CrossRef API in R we need to start by installing the rcrossref package from RStudio.</p>
+<pre class="r"><code>install.packages(&quot;rcrossref&quot;)
+install.packages(&quot;tidyverse&quot;)</code></pre>
+<p>Next we need to load the package.</p>
+<pre class="r"><code>library(rcrossref)
+library(tidyverse)</code></pre>
+<pre><code>## Loading tidyverse: ggplot2
+## Loading tidyverse: tibble
+## Loading tidyverse: tidyr
+## Loading tidyverse: readr
+## Loading tidyverse: purrr
+## Loading tidyverse: dplyr</code></pre>
+<pre><code>## Conflicts with tidy packages ----------------------------------------------</code></pre>
+<pre><code>## filter(): dplyr, stats
+## lag():    dplyr, stats</code></pre>
+<p>The main function that we will use in rcrossref is called <code>cr_works()</code> for CrossRef works. We can run the same query that we ran above as follows.</p>
+<pre class="r"><code>library(rcrossref)
+kenya &lt;- cr_works(query = &quot;kenya&quot;)</code></pre>
+<p>If we inspect <code>kenya</code> it is a list,</p>
+<pre class="r"><code>str(kenya, max.level = 1)</code></pre>
+<pre><code>## List of 3
+##  $ meta  :&#39;data.frame&#39;:  1 obs. of  4 variables:
+##  $ data  :Classes &#39;tbl_df&#39;, &#39;tbl&#39; and &#39;data.frame&#39;:  20 obs. of  28 variables:
+##  $ facets: NULL</code></pre>
+<p>We can access the components of the list using <code>$</code>.</p>
+<pre class="r"><code>kenya$meta$total_results</code></pre>
+<pre><code>## [1] 27824</code></pre>
+<p>This tells us that the total number of results referencing Kenya correspond with a web based query in early February 2017. In this article we are using a reference dataset from January 2017 with a slightly lower 27,299 records.</p>
+<p>By default the <code>cr_works</code> returns a data.frame with 20 results in the list. We can view this as follows</p>
+<pre class="r"><code>kenya$data</code></pre>
+<pre><code>## # A tibble: 20 × 28
+##    alternative.id                                        container.title
+##             &lt;chr&gt;                                                  &lt;chr&gt;
+## 1                                                        Phytocoenologia
+## 2                                                                  Kenya
+## 3                                                                  Kenya
+## 4                                                        Phytocoenologia
+## 5                                                        Phytocoenologia
+## 6                                                                       
+## 7                 International Journal of Management and Sustainability
+## 8          136/84              Tropical Grasslands - Forrajes Tropicales
+## 9                                                                       
+## 10                                                                      
+## 11                             Current Research in Agricultural Sciences
+## 12                                                                      
+## 13                                                                      
+## 14                                                     SpringerReference
+## 15                        Mammals of Africa : Hedgehogs, Shrews and Bats
+## 16                                                      Indians in Kenya
+## 17                                                    Kenya Veterinarian
+## 18                                       Maps of the Southern Kenya Rift
+## 19                                       Maps of the Southern Kenya Rift
+## 20                                       Maps of the Southern Kenya Rift
+## # ... with 26 more variables: created &lt;chr&gt;, deposited &lt;chr&gt;, DOI &lt;chr&gt;,
+## #   funder &lt;list&gt;, indexed &lt;chr&gt;, ISBN &lt;chr&gt;, ISSN &lt;chr&gt;, issue &lt;chr&gt;,
+## #   issued &lt;chr&gt;, link &lt;list&gt;, member &lt;chr&gt;, page &lt;chr&gt;, prefix &lt;chr&gt;,
+## #   publisher &lt;chr&gt;, reference.count &lt;chr&gt;, score &lt;chr&gt;, source &lt;chr&gt;,
+## #   subject &lt;chr&gt;, title &lt;chr&gt;, type &lt;chr&gt;, URL &lt;chr&gt;, volume &lt;chr&gt;,
+## #   assertion &lt;list&gt;, author &lt;list&gt;, `clinical-trial-number` &lt;list&gt;,
+## #   update.policy &lt;chr&gt;</code></pre>
+<p>To gain a fuller view use <code>View(cr_kenya$data)</code> in the console. To see just the heading we can use <code>names()</code> to retrieve the column names in the data.frame.</p>
+<pre class="r"><code>names(kenya$data)</code></pre>
+<pre><code>##  [1] &quot;alternative.id&quot;        &quot;container.title&quot;      
+##  [3] &quot;created&quot;               &quot;deposited&quot;            
+##  [5] &quot;DOI&quot;                   &quot;funder&quot;               
+##  [7] &quot;indexed&quot;               &quot;ISBN&quot;                 
+##  [9] &quot;ISSN&quot;                  &quot;issue&quot;                
+## [11] &quot;issued&quot;                &quot;link&quot;                 
+## [13] &quot;member&quot;                &quot;page&quot;                 
+## [15] &quot;prefix&quot;                &quot;publisher&quot;            
+## [17] &quot;reference.count&quot;       &quot;score&quot;                
+## [19] &quot;source&quot;                &quot;subject&quot;              
+## [21] &quot;title&quot;                 &quot;type&quot;                 
+## [23] &quot;URL&quot;                   &quot;volume&quot;               
+## [25] &quot;assertion&quot;             &quot;author&quot;               
+## [27] &quot;clinical-trial-number&quot; &quot;update.policy&quot;</code></pre>
+<p>From this sample we can see that we retrieve a range of fields including the URL, the document identifier (DOI), the author, funder, title and subject.</p>
+<p>The question now becomes whether we can retrieve more data from CrossRef.</p>
+<p>The maximum number of results that can be returned from a single query to CrossRef is 1,000. In the case of the Kenya data we would therefore need to make 27 queries. However, the CrossRef API also permits deep paging (fetching results from multiple pages). We can retrieve all the results by setting the cursor to the wildcard <code>*</code> and the cursor_max to the total results. Note that the cursor and the cursor_max arguments must appear together for this to work. Because it can take a while to retrieve the results we will add a progress bar using .progress to indicate how far along the query is.</p>
+<p>Let’s try retrieving the full results, this time using a higher value than our total results (27,299) for Kenya. The API should stop when it reaches the end and return the 27,299 results.</p>
+<pre class="r"><code>library(rcrossref)
+cr_kenya &lt;- cr_works(query=&quot;kenya&quot;, cursor = &quot;*&quot;, cursor_max = 28000, .progress = &quot;text&quot;)</code></pre>
+<p>This will take some time to return the results but will work. We can now extract the data.frame with the full results for Kenya. A check of the number of rows reveals the expected 27,299 rows.</p>
+<p>Next we can inspect the dataset using View.</p>
+<pre class="r"><code>View(cr_kenya)</code></pre>
+<p>We can summarise this data using dplyr from the tidyverse packages installed earlier, to gain an overview of the data. We will start with subjects.</p>
+<pre class="r"><code>library(tidyverse)
+cr_kenya %&gt;% count(subject, sort = TRUE)</code></pre>
+<pre><code>## # A tibble: 1,469 × 2
+##                                                                        subject
+##                                                                          &lt;chr&gt;
+## 1                                                                             
+## 2                                                                Medicine(all)
+## 3                                 Ecology, Evolution, Behavior and Systematics
+## 4                                             Parasitology,Infectious Diseases
+## 5  Biochemistry, Genetics and Molecular Biology(all),Agricultural and Biologic
+## 6  Public Health, Environmental and Occupational Health,Parasitology,Infectiou
+## 7                                                                      General
+## 8                              Geography, Planning and Development,Development
+## 9                         Public Health, Environmental and Occupational Health
+## 10                                     Food Animals,Animal Science and Zoology
+## # ... with 1,459 more rows, and 1 more variables: n &lt;int&gt;</code></pre>
+<p>We can see that the top result is blank. We can also see that different subjects are grouped together in some of the counts. We would like to separate these out for a more accurate summary.</p>
+<pre class="r"><code>library(tidyverse)
+cr_kenya %&gt;% separate_rows(subject, sep = &quot;,&quot;) %&gt;% 
+  count(subject, sort = TRUE) -&gt; subjects  # output
+subjects</code></pre>
+<pre><code>## # A tibble: 315 × 2
+##                                   subject     n
+##                                     &lt;chr&gt; &lt;int&gt;
+## 1                                         10147
+## 2                                 Ecology  2052
+## 3                     Infectious Diseases  2002
+## 4                Behavior and Systematics  1551
+## 5                               Evolution  1551
+## 6                Planning and Development  1375
+## 7                               Geography  1375
+## 8   Environmental and Occupational Health  1364
+## 9                           Public Health  1364
+## 10                          Medicine(all)  1209
+## # ... with 305 more rows</code></pre>
+<p>We still have a blank row as the top score indicating that our other categories will be under-represented and therefore inaccurate (time series may help to clarify if earlier records lack subjects or whether this is a more general problem). We can quickly visualise the top results with the <code>ggplot2</code> package.</p>
+<pre class="r"><code>library(tidyverse)
+library(ggplot2)
+subjects[1:15, ] %&gt;% 
+  ggplot2::ggplot(aes(subject, n, fill = subject)) +
+  geom_bar(stat = &quot;identity&quot;, show.legend = FALSE) +
+  coord_flip()</code></pre>
+<p><img src="crossref_files/figure-html/subjects_bar-1.png" width="672" /></p>
+<p>We can clearly see a number of relevant subject areas for access and benefit-sharing such as Parasitology, the Medicine general category, Infectious diseases and so on.</p>
+<p>We might also want to summarise the data by the <code>type</code>.</p>
+<pre class="r"><code>library(tidyverse)
+cr_kenya %&gt;% 
+  count(type, sort = TRUE)</code></pre>
+<pre><code>## # A tibble: 14 × 2
+##                   type     n
+##                  &lt;chr&gt; &lt;int&gt;
+## 1      journal-article 23770
+## 2         book-chapter  2312
+## 3              dataset   395
+## 4  proceedings-article   382
+## 5            component    91
+## 6                 book    88
+## 7               report    65
+## 8            monograph    63
+## 9                other    53
+## 10     reference-entry    47
+## 11        dissertation    24
+## 12      posted-content     4
+## 13      reference-book     4
+## 14       report-series     1</code></pre>
+<p>We can readily see that the bulk of the contents are journal articles followed by book chapters.</p>
+<p>We can also quickly visualise publication trends over time using <code>geom_line</code>. Visualizing trends over time is a bit tricky because there is no obvious publication date in the return from the CrossRef API. Instead we are presented with date fields for created and deposited, indexed, and issued. From a review of the <a href="https://github.com/CrossRef/rest-api-doc/blob/master/rest_api.md">API documentation</a> the issued field appears to be the best candidate pending further clarification.</p>
+<p>Inspection of the data reveals that the issued column (the data of issue of an identifier corresponding with a publication) is inconsistent. On some occasions it contains the YYYY on others YYYY-MM and on others YYYY-MM-DD. In addition there are some blanks in the data that will cause problems. So we will need to separate out that field into a new column with year.</p>
+<pre class="r"><code>library(tidyr)
+library(stringr)
+cr_kenya$issue_blank &lt;- str_detect(cr_kenya$issued, &quot;&quot;) # detect blanks</code></pre>
+<p>Next we will create a new data frame with the dates to graph.</p>
+<pre class="r"><code>library(dplyr)
+cr_kenya_dates &lt;- filter(cr_kenya, issue_blank == TRUE)</code></pre>
+<p>We can now process the data and draw a quick line plot with ggplot2. We will send this to the plotly function <code>ggplotly</code> which allows us to view the data points on hover. <code>ggplot2</code> is part of the tidyverse and so is installed above but you may need to <code>install.package(&quot;plotly&quot;)</code> and then load the library.</p>
+<pre class="r"><code>library(dplyr)
+library(ggplot2)
+library(plotly)
+cr_kenya_dates %&gt;% 
+  separate(., issued, c(&quot;year&quot;, &quot;month&quot;, &quot;date&quot;), sep = &quot;-&quot;, fill = &quot;right&quot;) %&gt;%
+  count(year) %&gt;% 
+  filter(year &gt;= 1990 &amp; year &lt;= 2016) %&gt;%
+  ggplot(aes(x = year, y = n, group = 1)) +
+  scale_x_discrete(breaks=seq(1990, 2015, 5)) +
+  geom_line() -&gt; out # data out
+  ggplotly(out)</code></pre>
+<div id="htmlwidget-1717c30e6925342f7d17" style="width:672px;height:480px;" class="plotly html-widget"></div>
+<script type="application/json" data-for="htmlwidget-1717c30e6925342f7d17">{"x":{"data":[{"x":[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27],"y":[254,239,303,292,299,345,307,312,294,331,378,426,435,402,568,527,643,841,897,1042,1055,1218,1323,1581,2031,2054,2357],"text":["year: 1990<br>n: 254<br>1: 1","year: 1991<br>n: 239<br>1: 1","year: 1992<br>n: 303<br>1: 1","year: 1993<br>n: 292<br>1: 1","year: 1994<br>n: 299<br>1: 1","year: 1995<br>n: 345<br>1: 1","year: 1996<br>n: 307<br>1: 1","year: 1997<br>n: 312<br>1: 1","year: 1998<br>n: 294<br>1: 1","year: 1999<br>n: 331<br>1: 1","year: 2000<br>n: 378<br>1: 1","year: 2001<br>n: 426<br>1: 1","year: 2002<br>n: 435<br>1: 1","year: 2003<br>n: 402<br>1: 1","year: 2004<br>n: 568<br>1: 1","year: 2005<br>n: 527<br>1: 1","year: 2006<br>n: 643<br>1: 1","year: 2007<br>n: 841<br>1: 1","year: 2008<br>n: 897<br>1: 1","year: 2009<br>n: 1042<br>1: 1","year: 2010<br>n: 1055<br>1: 1","year: 2011<br>n: 1218<br>1: 1","year: 2012<br>n: 1323<br>1: 1","year: 2013<br>n: 1581<br>1: 1","year: 2014<br>n: 2031<br>1: 1","year: 2015<br>n: 2054<br>1: 1","year: 2016<br>n: 2357<br>1: 1"],"key":null,"type":"scatter","mode":"lines","name":"","line":{"width":1.88976377952756,"color":"rgba(0,0,0,1)","dash":"solid"},"hoveron":"points","showlegend":false,"xaxis":"x","yaxis":"y","hoverinfo":"text"}],"layout":{"margin":{"t":26.2283105022831,"r":7.30593607305936,"b":40.1826484018265,"l":48.9497716894977},"plot_bgcolor":"rgba(235,235,235,1)","paper_bgcolor":"rgba(255,255,255,1)","font":{"color":"rgba(0,0,0,1)","family":"","size":14.6118721461187},"xaxis":{"domain":[0,1],"type":"linear","autorange":false,"tickmode":"array","range":[0.4,27.6],"ticktext":["1990","1995","2000","2005","2010","2015"],"tickvals":[1,6,11,16,21,26],"ticks":"outside","tickcolor":"rgba(51,51,51,1)","ticklen":3.65296803652968,"tickwidth":0.66417600664176,"showticklabels":true,"tickfont":{"color":"rgba(77,77,77,1)","family":"","size":11.689497716895},"tickangle":-0,"showline":false,"linecolor":null,"linewidth":0,"showgrid":true,"gridcolor":"rgba(255,255,255,1)","gridwidth":0.66417600664176,"zeroline":false,"anchor":"y","title":"year","titlefont":{"color":"rgba(0,0,0,1)","family":"","size":14.6118721461187},"hoverformat":".2f"},"yaxis":{"domain":[0,1],"type":"linear","autorange":false,"tickmode":"array","range":[133.1,2462.9],"ticktext":["500","1000","1500","2000"],"tickvals":[500,1000,1500,2000],"ticks":"outside","tickcolor":"rgba(51,51,51,1)","ticklen":3.65296803652968,"tickwidth":0.66417600664176,"showticklabels":true,"tickfont":{"color":"rgba(77,77,77,1)","family":"","size":11.689497716895},"tickangle":-0,"showline":false,"linecolor":null,"linewidth":0,"showgrid":true,"gridcolor":"rgba(255,255,255,1)","gridwidth":0.66417600664176,"zeroline":false,"anchor":"x","title":"n","titlefont":{"color":"rgba(0,0,0,1)","family":"","size":14.6118721461187},"hoverformat":".2f"},"shapes":[{"type":"rect","fillcolor":null,"line":{"color":null,"width":0,"linetype":[]},"yref":"paper","xref":"paper","x0":0,"x1":1,"y0":0,"y1":1}],"showlegend":false,"legend":{"bgcolor":"rgba(255,255,255,1)","bordercolor":"transparent","borderwidth":1.88976377952756,"font":{"color":"rgba(0,0,0,1)","family":"","size":11.689497716895}},"hovermode":"closest"},"source":"A","config":{"modeBarButtonsToAdd":[{"name":"Collaborate","icon":{"width":1000,"ascent":500,"descent":-50,"path":"M487 375c7-10 9-23 5-36l-79-259c-3-12-11-23-22-31-11-8-22-12-35-12l-263 0c-15 0-29 5-43 15-13 10-23 23-28 37-5 13-5 25-1 37 0 0 0 3 1 7 1 5 1 8 1 11 0 2 0 4-1 6 0 3-1 5-1 6 1 2 2 4 3 6 1 2 2 4 4 6 2 3 4 5 5 7 5 7 9 16 13 26 4 10 7 19 9 26 0 2 0 5 0 9-1 4-1 6 0 8 0 2 2 5 4 8 3 3 5 5 5 7 4 6 8 15 12 26 4 11 7 19 7 26 1 1 0 4 0 9-1 4-1 7 0 8 1 2 3 5 6 8 4 4 6 6 6 7 4 5 8 13 13 24 4 11 7 20 7 28 1 1 0 4 0 7-1 3-1 6-1 7 0 2 1 4 3 6 1 1 3 4 5 6 2 3 3 5 5 6 1 2 3 5 4 9 2 3 3 7 5 10 1 3 2 6 4 10 2 4 4 7 6 9 2 3 4 5 7 7 3 2 7 3 11 3 3 0 8 0 13-1l0-1c7 2 12 2 14 2l218 0c14 0 25-5 32-16 8-10 10-23 6-37l-79-259c-7-22-13-37-20-43-7-7-19-10-37-10l-248 0c-5 0-9-2-11-5-2-3-2-7 0-12 4-13 18-20 41-20l264 0c5 0 10 2 16 5 5 3 8 6 10 11l85 282c2 5 2 10 2 17 7-3 13-7 17-13z m-304 0c-1-3-1-5 0-7 1-1 3-2 6-2l174 0c2 0 4 1 7 2 2 2 4 4 5 7l6 18c0 3 0 5-1 7-1 1-3 2-6 2l-173 0c-3 0-5-1-8-2-2-2-4-4-4-7z m-24-73c-1-3-1-5 0-7 2-2 3-2 6-2l174 0c2 0 5 0 7 2 3 2 4 4 5 7l6 18c1 2 0 5-1 6-1 2-3 3-5 3l-174 0c-3 0-5-1-7-3-3-1-4-4-5-6z"},"click":"function(gd) { \n        // is this being viewed in RStudio?\n        if (location.search == '?viewer_pane=1') {\n          alert('To learn about plotly for collaboration, visit:\\n https://cpsievert.github.io/plotly_book/plot-ly-for-collaboration.html');\n        } else {\n          window.open('https://cpsievert.github.io/plotly_book/plot-ly-for-collaboration.html', '_blank');\n        }\n      }"}],"modeBarButtonsToRemove":["sendDataToCloud"]},"base_url":"https://plot.ly"},"evals":["config.modeBarButtonsToAdd.0.click"],"jsHooks":[]}</script>
+</div>
+<div id="working-with-author-data" class="section level3">
+<h3>Working with Author Data</h3>
+<p>We also have some data on the authors of the publications. However, this takes the form of a list column. Using <code>dplyr</code> it is easy to process this column into a new field. In the process the new table will be split on individual author names. Cleaning and matching author names is a multi step process and one of the most time consuming and difficult tasks in bibliometrics/scientometrics. Here we will walk through the basics of the process and issues encountered step by step.</p>
+<p>First we need to note that the author column contains NA values (as NULL). So we need to filter the table first. Then we will unnest the author list column and create a new field <code>full_name</code> from the family and given name. Next we will rename the <code>family</code> and <code>given</code> fields by adding <code>auth_</code>. This will make it easier to distinguish columns when different datasets are joined below.</p>
+<pre class="r"><code>library(tidyr)
+# Remove null, unnest list column, create full_name
+cr_kenya_authors &lt;- cr_kenya[cr_kenya$author != &quot;NULL&quot;, ] %&gt;% 
+  tidyr::unnest(., author) %&gt;%
+  tidyr::unite(auth_full_name, c(family, given), sep = &quot; &quot;, remove = FALSE) %&gt;% 
+  rename(&quot;auth_family&quot; = family, &quot;auth_given&quot; = given)</code></pre>
+<p>To aid with basic name matching the next step is to remove punctuation and convert all names to lower case.</p>
+<pre class="r"><code>library(dplyr)
+library(stringr)
+# remove punctuation full_name
+cr_kenya_authors$auth_full_nopunct &lt;- str_replace_all(cr_kenya_authors$auth_full_name, &quot;[[:punct:]]&quot;, &quot;&quot;) %&gt;%
+  tolower() %&gt;% 
+  str_trim(., side = &quot;both&quot;)
+
+# extract first word from auth_given name
+cr_kenya_authors$auth_given_nopunct &lt;- gsub( &quot; .*$&quot;, &quot;&quot;, cr_kenya_authors$auth_given) %&gt;%
+  str_replace_all(., &quot;[[:punct:]]&quot;, &quot; &quot;) %&gt;%
+  tolower() %&gt;% 
+  str_trim(., side = &quot;both&quot;)</code></pre>
+<p>We will address author initials below.</p>
+<p>We now have a data.frame with 95,840 rows with an author name per row. Because author names may contain varying punctuation (and typically require cleaning) we have created a field containing no punctuation. To avoid mismatches on the same name with different cases we have also converted the names to all lower case. If we were to go further with name cleaning in R we could use the <code>stringdist</code> package for common algorithms such as Levenshtein distance (see the native R function <code>adist()</code>).</p>
+<p>Let’s take a quick look at the data.</p>
+<pre class="r"><code>cr_kenya_authors %&gt;% count(auth_full_nopunct, sort = TRUE)</code></pre>
+<pre><code>## # A tibble: 52,667 × 2
+##     auth_full_nopunct     n
+##                 &lt;chr&gt; &lt;int&gt;
+## 1               na na  1222
+## 2        murase kenya   209
+## 3        hamano kenya   104
+## 4      kusunose kenya   104
+## 5          nasu kenya    96
+## 6  bukusi elizabeth a    90
+## 7       cohen craig r    90
+## 8       shimada kenya    90
+## 9     suzuki takahiko    87
+## 10        honda kenya    84
+## # ... with 52,657 more rows</code></pre>
+<p>In inspecting this data we can note two points. First, we have a double NA (not available) at the top and then results that contain the name Kenya (because we did not specify the field of search - so it may also be worth looking in the journals field). So, ideally we would filter those results out of the data as false positives (bearing in mind unlikely cases where Kenya may appear in the title and also in the author names).</p>
+<p>For the moment we will filter on the NA and the name Kenya in the results on the given name, taking into account that in a small number of cases the name kenya could potentially be a valid result.</p>
+<pre class="r"><code>library(dplyr)
+cr_kenya_authors %&gt;%
+  filter(auth_given_nopunct != &quot;kenya&quot;) %&gt;% 
+filter(auth_given_nopunct != &quot;na na&quot;) -&gt; cr_kenya_authors # output
+head(cr_kenya_authors$auth_given_nopunct)</code></pre>
+<pre><code>## [1] &quot;a&quot;         &quot;a&quot;         &quot;a&quot;         &quot;a&quot;         &quot;christian&quot; &quot;carles&quot;</code></pre>
+<pre class="r"><code>cr_kenya_authors %&gt;% count(auth_full_nopunct, sort = TRUE)</code></pre>
+<pre><code>## # A tibble: 51,984 × 2
+##      auth_full_nopunct     n
+##                  &lt;chr&gt; &lt;int&gt;
+## 1   bukusi elizabeth a    90
+## 2        cohen craig r    90
+## 3      suzuki takahiko    87
+## 4  kinoshita yoshihisa    71
+## 5     breiman robert f    67
+## 6     taniguchi masaki    66
+## 7  terashima mitsuyasu    66
+## 8     yamada hirotsugu    66
+## 9     tsuchikane etsuo    64
+## 10       sata masataka    61
+## # ... with 51,974 more rows</code></pre>
+</div>
+<div id="mapping-researcher-names-into-publication-data." class="section level3">
+<h3>Mapping researcher names into publication data.</h3>
+<p>We have a separate list of researchers who at one time or another have received a permit to conduct research in Kenya. What we would like to do, is identify the researchers in the CrossRef data as a basis for compiling a data set of their publications. That data could then serve as a resource for other researchers and help demonstrate the value of biodiversity related research in countries such as Kenya.,</p>
+<p>We now want to identifier researchers who have received a research permit in the data. Let’s load the researcher data from the project folder.</p>
+<pre class="r"><code>load(&quot;data/permits.rda&quot;)</code></pre>
+<p>Note here that our data will be limited to those cases where an author will also mention the word Kenya in the title of a publication. So, we need to bear in mind that our publication data will be incomplete and will not capture the full range of publications by a permit holder. The object of this exercise is simply to demonstrate methods for linking permit and researcher data.</p>
+<p>We will do some data preparation to make our lives easier. First we will convert the surname_firstname to lower case.</p>
+<pre class="r"><code>permits$surname_firstname_lower &lt;- tolower(permits$res_surname_firstname)</code></pre>
+<p>Second we will add <code>res_</code> to the researcher names so that we know we are dealing with a researcher when matching with the publication data. This has been pre-prepared and so will not be run.</p>
+<pre class="r"><code>library(dplyr)
+permits %&gt;% rename(&quot;res_first_name&quot; = first_name, &quot;res_second_name&quot; = second_name, &quot;res_surname&quot; = surname, &quot;res_surname_firstname&quot; = surname_firstname, &quot;res_surname_firstname_lower&quot; = surname_firstname_lower) -&gt; permits # output</code></pre>
+<p>A standard procedure in name matching (except where using string distance algorithms which automate the procedure) is to match on surname, given names and initials.</p>
+<p>First we will attempt a surname match from the <code>permits</code> data.</p>
+<p>We set up the data for comparison by converting the family name data in the CrossRef dataset to lower case and do the same for the researcher surname field.</p>
+<pre class="r"><code>cr_kenya_authors$auth_family_lower &lt;- tolower(cr_kenya_authors$auth_family)
+permits$res_surname_lower &lt;- tolower(permits$res_surname)</code></pre>
+<p>We now have two comparable fields with lowercase entries.</p>
+<p>Let’s try comparing the two. This will return a logical true or false for matches and we just show the first 20 rows.</p>
+<pre class="r"><code>library(dplyr)
+permits$res_surname_lower %in% cr_kenya_authors$auth_family_lower %&gt;% 
+  head(20)</code></pre>
+<pre><code>##  [1] FALSE  TRUE FALSE  TRUE FALSE  TRUE  TRUE FALSE FALSE  TRUE  TRUE
+## [12]  TRUE  TRUE FALSE FALSE  TRUE  TRUE  TRUE  TRUE FALSE</code></pre>
+<p>To join these two tables together we actually need a shared field. We will use the respective family_lower field from the two datasets and create a new shared field called family_lower.</p>
+<pre class="r"><code>cr_kenya_authors$family_lower &lt;- cr_kenya_authors$auth_family_lower
+permits$family_lower &lt;- permits$res_surname_lower</code></pre>
+<p>Next let’s use inner_join to join the tables together. An inner join will only include those that match in both tables by the family_lower field.</p>
+<pre class="r"><code>library(dplyr)
+inner_family &lt;- inner_join(cr_kenya_authors, permits, by = &quot;family_lower&quot;)</code></pre>
+<p>From our 91,303 author rows we now have matches for 9,700 on the author names. We would benefit from cutting down the size of the table.</p>
+<!--- correct the numbers above--->
+<pre class="r"><code>library(dplyr)
+inner_family %&gt;% select(DOI, ISBN, ISSN, subject, title, subtitle, type, URL, subject, affiliation.name, ORCID, auth_full_name, auth_given, auth_family, auth_full_nopunct, auth_given_nopunct, auth_family_lower, project_title, res_first_name, res_second_name, res_surname, res_surname_firstname, res_surname_lower, res_surname_firstname_lower, family_lower) -&gt; short_inner_family # output</code></pre>
+<pre class="r"><code>load(&quot;short_inner_family.rda&quot;)</code></pre>
+<p>Having identified shared surnames between the permit and the publication data we can now attempt to identify shared first names. However, it is important to note that scientific publications commonly only use the author initials as part of the name. For that reason we will convert the CrossRef <code>given_name</code> to its first initial and do the same for the permit data <code>first_name</code>.</p>
+<pre class="r"><code>library(stringr)
+# extract the first initial from author names
+short_inner_family$auth_initial &lt;- str_extract(short_inner_family$auth_given, &quot;[^ ]&quot;) %&gt;%
+  str_trim(side = &quot;both&quot;)
+# extract the first initial from researcher names
+short_inner_family$res_initial &lt;- str_extract(short_inner_family$res_first_name, &quot;[^ ]&quot;) %&gt;% str_trim(side = &quot;both&quot;)</code></pre>
+<p>We are now in a position to compare the two. This time we will need to use <code>which()</code> for the matching and then create a logical test. In the process we will create some temporary tables which we will then remove.</p>
+<pre class="r"><code>library(dplyr)
+# turn row.names to rows
+short_inner_family$rows &lt;- row.names(short_inner_family) 
+# match initials and add logical column
+tmp &lt;- which(short_inner_family$auth_initial == short_inner_family$res_initial) %&gt;% 
+  as.character()
+short_inner_family$initial_match &lt;- short_inner_family$rows %in% tmp
+rm(tmp)
+
+# match first and given names
+# convert researcher first name to lower
+short_inner_family$res_first_name_lower &lt;- tolower(short_inner_family$res_first_name)
+# identify matches
+tmp1 &lt;- which(short_inner_family$auth_given_nopunct == short_inner_family$res_first_name_lower) %&gt;% 
+  as.character()
+# add logical column
+short_inner_family$given_first_match &lt;- short_inner_family$rows %in% tmp1
+rm(tmp1)</code></pre>
+<p>Next we create a new table where the match on first initials is TRUE (as this field is likely to contain the largest number of results but will also be the noisiest).</p>
+<pre class="r"><code>library(dplyr)
+initial_match &lt;- filter(short_inner_family, initial_match == &quot;TRUE&quot;)</code></pre>
+<!--- update number--->
+<p>This reduces the table to 1,218 results. Next we will filter the initial data to show those cases where the given first name match is also TRUE.</p>
+<pre class="r"><code>library(dplyr)
+given_match &lt;- filter(initial_match, given_first_match == &quot;TRUE&quot;)</code></pre>
+<!--- is now 604 results--->
+<p>This produces 529 results. We are quite solid with the 529 given matches because the surname and the first part of the first name must match. Here we need to be careful that when dealing with names we should beware of false positives (homonyms or lumps) where common names that do not correspond with the same person are lumped together. We also need to be aware of situations where there are name reversals, that is where a first name appears as a second name in one table and in reverse in another.</p>
+<p>There are limits to how far we can go with accurate name cleaning in R, although the <code>stringdist</code> package looks promising, and to go further using free tools we might want to proceed using <a href="http://openrefine.org/">Open Refine</a>. For a tutorial on name cleaning with Open Refine see the <a href="https://wipo-analytics.github.io/open-refine.html">WIPO Manual on Open Source Patent Analytics</a>.</p>
+<!--- An rpackage ropenrefine is available on Github and allows you to export a file directly into an open instance of open refine, clean up the data, and then export the data back into R. 
+
+
+```r
+devtools::install_github("vpnagraj/rrefine")
+library(rrefine)
+readr::write_csv(cr_kenya_authors, "cr_kenya_authors.csv")
+#make sure openrefine is open then:
+refine_upload(file = "/Users/pauloldham17inch/Desktop/open_source_master/abs/cr_kenya_authors.csv", project.name = "crossref_cleanup", open.browser = TRUE)
+# execute cleanup steps in open refine, then:
+import_refine <- refine_export(project.name = "crossref_cleanup")
+import_refine
+# The above works nicely in returning a data.frame in R but watch whether it does violence to the colun names
+```
+
+No it is fine. In cr_kenya authors replace stops in cols with underscores. --->
+<p>To go further we will use specialist text mining and analytics software <a href="https://www.thevantagepoint.com/">VantagePoint</a>. VantagePoint is paid for software that is available in student and academic editions. A key advantage of VantagePoint over work in R or other programming languages is that it is possible to easily review and group name matches and to use match criteria and fuzzy logic matching for name cleaning. In short, accurate name cleaning is simply easier to do in VantagePoint than any other tool so far tested when dealing with tens of thousands of names.</p>
+</div>
+<div id="reviewing-data-in-vantagepoint" class="section level3">
+<h3>Reviewing data in VantagePoint</h3>
+<p>We have two options that we can use with Vantage Point. We can simply write the existing full dataset to a .csv or excel file from R and import it into Vantage Point. Or, alternatively we can do the same with the shorter initial match or given match tables.</p>
+<p>For the purpose of experimentation we exported the entire table to a .csv file and then imported it into Vantage Point. To export the entire table we use:</p>
+<pre class="r"><code>readr::write_csv(cr_kenya_authors, &quot;cr_kenya_authors.csv&quot;)</code></pre>
+<p>In the image below we see the complete dataset in Vantage Point view.</p>
+<div class="figure">
+<img src="images/crossref/vantage_point1.png" />
+
+</div>
+<p>Next, we combine the author names and the researcher names fields into one field consisting of 53,043 names and then review matches between the researcher names and author names that are assigned to a review group. The image below shows the results of this exercise with the titles of articles on the left and the research project title on the right.</p>
+<div class="figure">
+<img src="images/crossref/vantage_point_review.png" />
+
+</div>
+<p>In this case we can see that the researcher has received a permit for the conservation of small mammals in Kenyan forests. There is a close correspondence between this topic and the titles of articles such as <code>Bartonella spp. in Bats, Kenya</code>.</p>
+<p>However, it is also important to bear in mind that this will not always be the case. For example, David Bukusi (as <code>bukusi munyikombo david</code>) has received a research permit for the <code>Assessment of Visitor Numbers on Activity Patterns of Carnivores Activity: A Case of Nairobi Orphanage</code>. However, an apparent author match on <code>bukusi david</code> reveals titles that focus on HIV related issues such as <code>Assisted partner notification services to augment HIV testing and linkage to care in Kenya: study protocol for a cluster randomized trial</code>. This is a case of a false positive match that can only be detected by comparing the subject area of the research permit and the subject area of the article.</p>
+<p>False positives (on shared name matches or lumps) are more of a problem to address than splits. For example, in some cases a shared name may contain valid results and contain false results arising from the grouping of distinct persons with the same name together.</p>
+<p>The easiest way to address this is to use other fields, such as author affiliations and subject areas, to match valid records. However, it is also important to bear in mind that researchers may change subject areas over time from project to project. Therefore when using subject area matches (as for this permit data) a degree of judgement is required along with accepting that data cleaning is typically a multi-step process.</p>
+<p>The conclusion of this process involves excluding false positives at the review stage and then combining (using fuzzy logic matching in VantagePoint) variant names into single names. This reduces our dataset to a total of 89 researcher names who are also present in the scientific literature from our raw starting point of 410 unique researcher names. In other words, using a raw CrossRef dataset for Kenya we were able to identify 22% of our researcher names in publications. Let’s load that dataset.</p>
+<p>If we inspect the cr_permits_clean dataset we will observe two main points. The first of these is that while there are 89 unique author names, there are 183 variant names. In other words, there are a large number of variant spellings of author names across this relatively small set.</p>
+<pre class="r"><code>library(dplyr)
+cr_permits_clean %&gt;%
+  count(auth_res_combined_clean) %&gt;% 
+  arrange(desc(n))</code></pre>
+<pre><code>## # A tibble: 89 × 2
+##    auth_res_combined_clean     n
+##                      &lt;chr&gt; &lt;int&gt;
+## 1            sang rosemary    46
+## 2             kanyari paul    27
+## 3             ofula victor    20
+## 4          cerling thure e    19
+## 5          agwanda bernard    14
+## 6             cords marina    14
+## 7            masiga daniel    13
+## 8           gakuya francis    11
+## 9         gichuki nathan n    11
+## 10        isbell ann lynne    11
+## # ... with 79 more rows</code></pre>
+<p>In the data view below we can an insight into the variations of names where <code>agwanda bernard</code> is also <code>agwanda bernard risky</code>, <code>agwanda b r</code>, and <code>agwanda b</code>. These variants would increase if we had not previously regularised the case and removed punctuation.</p>
+<pre class="r"><code>library(dplyr)
+cr_permits_clean %&gt;%
+  select(auth_res_combined_clean, auth_res_combined_vars) %&gt;% 
+  arrange(auth_res_combined_clean)</code></pre>
+<pre><code>## # A tibble: 399 × 2
+##    auth_res_combined_clean auth_res_combined_vars
+##                      &lt;chr&gt;                  &lt;chr&gt;
+## 1          agwanda bernard  agwanda bernard risky
+## 2          agwanda bernard           agwanda b  r
+## 3          agwanda bernard        agwanda bernard
+## 4          agwanda bernard              agwanda b
+## 5          agwanda bernard        agwanda bernard
+## 6          agwanda bernard        agwanda bernard
+## 7          agwanda bernard        agwanda bernard
+## 8          agwanda bernard        agwanda bernard
+## 9          agwanda bernard  agwanda bernard risky
+## 10         agwanda bernard        agwanda bernard
+## # ... with 389 more rows</code></pre>
+</div>
+<div id="the-future-of-name-disambiguation" class="section level3">
+<h3>The future of name disambiguation</h3>
+<p>In this section we have focused on the use of a free API to retrieve data about research in Kenya and then to map a set of research permit holders into the author data.</p>
+<p>In the process using a simple approach involving harmonising and matching names we have demonstrated that name matching between datasets involves significant challenges. A number of options exist to address these challenges.</p>
+<ol style="list-style-type: decimal">
+<li>To use string distance matching algorithms (e.g. Levenshtein distance and Jaccard scores) to automate matching within specific parameters. The <code>stringdist</code> package in R suggests a way forward in implementing this method.</li>
+<li>Where available (and in this case the necessary fields were not available) the use of author disambiguation algorithms including machine learning approaches [Citations needed here].</li>
+</ol>
+<p>However, an alternative approach is also beginning to emerge that focuses on the use of unique author identifiers. We will turn to testing this in the next section using ORCID identifiers.</p>
+</div>
+<div id="round-up" class="section level3">
+<h3>Round Up</h3>
+<p>In this section we used the CrossRef API service to access the scientific literature about Kenya using the <code>rcrossref</code> package in R. We then explored the data and split the data to reveal author names. In the next step we started the process of basic matching of a set of researcher names from research permits with author names in the scientific literature. In the process we encountered the main problems involved in name matching, <code>splits</code> or variants of names and <code>lumps</code> or cases where the same name is shared by multiple persons.</p>
+<p>Our approach demonstrates proof of concept and the issues encountered in mapping research permit holder names into the scientific literature. However, it is important to also recognise the following limitations.</p>
+<ol style="list-style-type: decimal">
+<li><p>CrossRef is not a text based search engine and the ability to conduct text based searches is presently crude. Furthermore, we can only search a very limited number of fields and this will inevitably result in lower returns than commercial databases such as Web of Science (where abstracts and author keywords are available). It may be that the use of a number of different APIs (such as for PubMed) will improve data coverage and this could be tested against Web of Science or Scopus results in future.</p></li>
+<li><p>Matching research permit holder names with author names involves disambiguation challenges for variant names and lumped author names. Automation of these steps will require closer attention to name matching algorithms and testing existing approaches to name author disambiguation.</p></li>
+<li><p>Name matching is an iterative process where false positives are the key problem.</p></li>
+</ol>
+<p>In the next section we will focus on exploring the use of the ORCID system using the same data to examine the contribution of researcher identifiers to monitoring access and benefit-sharing.</p>
+</div>
+
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

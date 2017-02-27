@@ -1,0 +1,11 @@
+base
+dplyr
+readr
+tidyr
+stringr
+lensr
+ggplot2
+plotly
+leaflet
+rorcid
+stringdist

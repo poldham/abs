@@ -1,0 +1,835 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+
+<meta name="author" content="Paul Oldham" />
+
+
+<title>Accessing the Global Biodiversity Information Facility with rgbif</title>
+
+<script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/bootstrap.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="site_libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
+<link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<link href="site_libs/highlightjs-1.1/default.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-1.1/highlight.js"></script>
+<script src="site_libs/htmlwidgets-0.8/htmlwidgets.js"></script>
+<link href="site_libs/plotlyjs-1.16.3/plotly-htmlwidgets.css" rel="stylesheet" />
+<script src="site_libs/plotlyjs-1.16.3/plotly-latest.min.js"></script>
+<script src="site_libs/plotly-binding-4.5.6/plotly.js"></script>
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs && document.readyState && document.readyState === "complete") {
+   window.setTimeout(function() {
+      hljs.initHighlighting();
+   }, 0);
+}
+</script>
+
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+
+</head>
+
+<body>
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+  height: auto;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+</style>
+
+
+<style type="text/css">
+/* padding for bootstrap navbar */
+body {
+  padding-top: 51px;
+  padding-bottom: 40px;
+}
+/* offset scroll position for anchor links (for fixed navbar)  */
+.section h1 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+
+.section h2 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h3 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h4 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h5 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h6 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+</style>
+
+<script>
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark it active
+  menuAnchor.parent().addClass('active');
+
+  // if it's got a parent navbar menu mark it active as well
+  menuAnchor.closest('li.dropdown').addClass('active');
+});
+</script>
+
+
+<div class="container-fluid main-container">
+
+<!-- tabsets -->
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+</script>
+
+<!-- code folding -->
+
+
+
+
+<script>
+$(document).ready(function ()  {
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_').toLowerCase();
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+  padding-left: 25px;
+  text-indent: 0;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row-fluid">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">Handbook on ABS Monitoring</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">Introduction</a>
+</li>
+<li>
+  <a href="gettingstarted.html">Getting Started</a>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    Working with Taxonomic Data
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="gbif.html">Accessing GBIF</a>
+    </li>
+    <li>
+      <a href="mapgbif.html">Mapping GBIF Data</a>
+    </li>
+  </ul>
+</li>
+<li>
+  <a href="crossref.html">Accessing Scientific Literature</a>
+</li>
+<li>
+  <a href="geonames.html">Mapping with Geonames</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div class="fluid-row" id="header">
+
+
+
+<h1 class="title toc-ignore">Accessing the Global Biodiversity Information Facility with rgbif</h1>
+<h4 class="author"><em>Paul Oldham</em></h4>
+
+</div>
+
+
+<div id="introduction" class="section level3">
+<h3>Introduction</h3>
+<p>In this article we will look at how to obtain taxonomic and geographic occurrence data from <a href="http://www.gbif.org/">the Global Biodiversity Information Facility (GBIF)</a>. Our purpose is to use GBIF data as part of a wider model for monitoring access and benefit-sharing (ABS) under the <a href="https://www.cbd.int/abs/about/">Nagoya Protocol</a>. You can read about the wider model <a href="http://oneworldanalytics.com/abspermits/">here</a>. However, our focus in this article will be on the basics of accessing and working with GBIF data.</p>
+<p>One of the challenges in monitoring biodiversity in general is gaining data on the species that are known to exist within a country. GBIF plays a key role in providing access to taxonomic data about a country and can easily be downloaded using either the <a href="http://www.gbif.org/">GBIF website</a> or using the <a href="http://www.gbif.org/developer/summary">API</a> and packages such as <a href="https://github.com/ropensci/rgbif"><code>rgbif</code></a> from <a href="https://ropensci.org/">rOpenSci</a> in R with <a href="https://www.rstudio.com/">RStudio</a>.</p>
+<p>In this walk through we will focus on downloading and processing GBIF records to do three things:</p>
+<ol style="list-style-type: decimal">
+<li>Generate quick summaries of the available data about species within a country.</li>
+<li>Create a species name list that can be used for searching and text mining with other databases as part of ABS monitoring.</li>
+<li>Create a species occurrence table with latitude and longitude coordinates for use in the creation of interactive maps.</li>
+</ol>
+<p>This walk through will use Kenya as the example and is intended to support implementation of monitoring under the Nagoya Protocol in Kenya and elsewhere. This article does not go into the details of cleaning up species occurrence records in GBIF but the <a href="https://github.com/ropensci/rgbif/blob/master/vignettes/issues_vignette.Rmd"><code>rgbif</code> vignette on cleaning</a> and issues with <a href="https://github.com/ropensci/rgbif/blob/master/vignettes/taxonomic_names.Rmd">taxonomic names</a> can help you with that.</p>
+</div>
+<div id="retrieving-data-from-gbif" class="section level3">
+<h3>Retrieving Data from GBIF</h3>
+<p>GBIF data is made available in either simple .csv form or in the more detailed <a href="http://www.gbif.org/resource/80636">Darwin Core format</a>. Here we will focus on the use of the simple .csv format that can easily be used in a range of software packages.</p>
+<p>We can readily retrieve data from GBIF by visiting the website and creating a free account.</p>
+<div class="figure">
+<img src="images/gbif/gbif_front.png" />
+
+</div>
+<p>Signup or sign in for a free account.</p>
+<div class="figure">
+<img src="images/gbif/gbif_account.png" />
+
+</div>
+<p>When you have signed up for an account you will be able to generate datasets that can be downloaded with the information that you need, either directly from GBIF, over email, or using packages such as <code>rgbif</code>.</p>
+<p>For country records use the data drop down to select a country</p>
+<div class="figure">
+<img src="images/gbif/gbif_2.png" />
+
+</div>
+<p>In this case we will select Kenya (a GBIF member).</p>
+<div class="figure">
+<img src="images/gbif/gbif_country.png" />
+
+</div>
+<p>When we open up the Kenya country page we will see the following.</p>
+<div class="figure">
+<img src="images/gbif/kenya_page.png" />
+
+</div>
+<p>We can see from this that there are 703,192 occurrence records for Kenya (the main way in which GBIF data is organised). If we click on the hyperlinked <code>703,192 records</code> we will be able to download the results. Unless you want the .pdf country report do not click the big blue button.</p>
+</div>
+<div id="downloading-gbif-results" class="section level3">
+<h3>Downloading GBIF Results</h3>
+<p>Downloading GBIF results is a multi-step process.</p>
+<div class="figure">
+<img src="images/gbif/kenya_occurrences.png" />
+
+</div>
+<p>Note that 700,161 records are available from the amount quoted on the front page. When we press on the download occurrences button in the image above, GBIF will start preparing a dataset. This takes varying amounts of time depending on the size of the dataset. When the data preparation is complete an email will be sent with a URL for the link to your account to download the dataset.</p>
+<p>You can either download the dataset directly and open it in Excel, Open Office or other software such as Tableau. Alternatively, if using RStudio you can import it into R using the <code>rgbif</code> package as follows with thanks to <a href="https://ropensci.org/about/">Scott Chamberlain from rOpenSci</a> for enabling easy .csv import in <code>rgbif</code>.</p>
+<p>Install the package.</p>
+<pre class="r"><code>install.packages(&quot;rgbif&quot;)</code></pre>
+<p>Load the library.</p>
+<pre class="r"><code>library(rgbif)</code></pre>
+<p>In this we will use the Kenya dataset above with 700,168 records from January 2017. The dataset has the following <code>doi</code> for citation: <a href="http://www.gbif.org/occurrence/download/0054538-160910150852091">doi:10.15468/dl.b04fyt</a>. The URL contains the ID for the dataset <a href="http://www.gbif.org/occurrence/download/0054538-160910150852091" class="uri">http://www.gbif.org/occurrence/download/0054538-160910150852091</a> and we will be needing the ID 0054538-160910150852091</p>
+<p>If using RStudio the most efficient way to import data is to use <code>rgbif</code> and download and import the data directly in one step as follows. Note that GBIF .csv files include a large number of blank cells. The final line converts these to NA for Not Available. This will generate a message that we are not going to worry about.</p>
+<pre class="r"><code>library(rgbif)
+library(dplyr)
+kenya_gbif &lt;- occ_download_get(key = &quot;0054538-160910150852091&quot;, overwrite = TRUE) %&gt;% 
+    occ_download_import(kenya_gbif_download, na.strings = c(&quot;&quot;, NA))</code></pre>
+<p>In the unlikely event that you experience problems you could simply download, unzip and then read in the file using the <code>readr</code> package or <code>data.table::fread()</code> (as used in <code>rgbif</code> above). Note that there are a significant number of empty cells in GBIF data as well as NA cells. The easiest way to deal with this is to convert the empty cells to NA at the time of import.</p>
+<pre class="r"><code>kenya_gbif_readr &lt;- readr::read_delim(&quot;pathtofile&quot;, delim = &quot;\t&quot;, escape_double = FALSE, 
+    col_names = TRUE, na = c(&quot;&quot;, &quot;NA&quot;))</code></pre>
+<p>Note that for reasons that are presently unclear, <code>readr</code> drops a small number of rows from the expected results. As an alternative use <code>fread()</code> from the <code>data.table</code> package (the arguments to <code>fread()</code> are available in <code>occ_download_import()</code> in <code>rgbif</code> so you really shouldn’t need to do that). This is most likely to be useful if you experience problems with a particular file and want to figure that out.</p>
+<pre class="r"><code>library(data.table)
+kenya_gbif_fread &lt;- fread(&quot;pathtofile&quot;, na.strings = c(&quot;&quot;, NA))</code></pre>
+</div>
+<div id="reviewing-gbif-data" class="section level3">
+<h3>Reviewing GBIF Data</h3>
+<p>We will use the <code>dplyr</code> package to work with the data. If you do not have the <code>dplyr</code> package in R then download and install the <code>tidyverse</code> which combines the main data wrangling packages we will be using in one place.</p>
+<pre class="r"><code>install.packages(&quot;tidyverse&quot;)</code></pre>
+<p>The tidyverse consists of a set of core packages, including <code>dplyr</code> and <code>tidyr</code> that are typically used whenever you are working with data while other packages, such as <code>stringr</code> for manipulating strings, are also installed but not automatically loaded. When you have installed <code>tidyverse</code>, load the <code>dplyr</code> package.</p>
+<pre class="r"><code>library(tidyverse)</code></pre>
+<p>We now have a dataset with 700,168 rows and 44 columns.</p>
+<p>One important feature of GBIF data is that the rows include different taxonranks such as Kingdom, Family, Genus and Species. This means that when we summarise the data, we need to ensure that we have selected the right category of data.</p>
+<p>We can quickly summarise the number of occurrences by kingdom using the <code>dplyr</code> package.</p>
+<pre class="r"><code>library(tidyverse)
+load(&quot;data/kenya_gbif.rda&quot;)
+kenya_gbif %&gt;% drop_na(kingdom) %&gt;% count(kingdom, sort = TRUE)</code></pre>
+<pre><code>## # A tibble: 9 × 2
+##          kingdom      n
+##            &lt;chr&gt;  &lt;int&gt;
+## 1       Animalia 604038
+## 2        Plantae  79688
+## 3          Fungi   7102
+## 4       Protozoa   4826
+## 5      Chromista    825
+## 6       Bacteria    324
+## 7        Archaea     15
+## 8        Viruses      9
+## 9 incertae sedis      8</code></pre>
+<p>The value of <code>n</code> is the number of occurrence records in the dataset by kingdom and should not be confused with the number of species.</p>
+<p>We can count the number of occurrence records for each species as follows. Note that we filter the taxonrank column to select species.</p>
+<pre class="r"><code>library(tidyverse)
+kenya_gbif %&gt;% filter(taxonrank == &quot;SPECIES&quot;) %&gt;% count(species) %&gt;% arrange(desc(n))</code></pre>
+<pre><code>## # A tibble: 18,131 × 2
+##                  species     n
+##                    &lt;chr&gt; &lt;int&gt;
+## 1    Pycnonotus barbatus  5157
+## 2        Colius striatus  3564
+## 3  Lamprotornis superbus  3076
+## 4    Bostrychia hagedash  3027
+## 5     Ploceus baglafecht  2948
+## 6   Alopochen aegyptiaca  2657
+## 7       Motacilla aguimp  2637
+## 8           Corvus albus  2529
+## 9     Dicrurus adsimilis  2528
+## 10        Milvus migrans  2433
+## # ... with 18,121 more rows</code></pre>
+<p>We can see that the top species in terms of occurrence records is a bird <strong>Pycnonotus barbatus</strong>, the common bulbul. This provides us with a clue that there are a large number of observation records for birds in GBIF data.</p>
+<p>To get a quick overview of the number of occurrence records by taxonrank we can simply change the count to count by taxonrank. This is not very exciting except perhaps to note the occurrence records for species, subspecies and variety.</p>
+<pre class="r"><code>library(tidyverse)
+kenya_gbif %&gt;% count(taxonrank)</code></pre>
+<pre><code>## # A tibble: 11 × 2
+##     taxonrank      n
+##         &lt;chr&gt;  &lt;int&gt;
+## 1       CLASS   2099
+## 2      FAMILY  12160
+## 3        FORM     46
+## 4       GENUS  47096
+## 5     KINGDOM    630
+## 6       ORDER  22910
+## 7      PHYLUM    669
+## 8     SPECIES 566020
+## 9  SUBSPECIES  41353
+## 10    VARIETY   3862
+## 11       &lt;NA&gt;   3323</code></pre>
+<p>If we are interested in mapping the data later on (and we are) we will probably want to get a grip on the species occurrence records for birds to check whether the dataset is flooded with bird observation data. Again we can do this quite easily.</p>
+<pre class="r"><code>library(tidyverse)
+kenya_gbif %&gt;% count(class, sort = TRUE) %&gt;% drop_na(class) %&gt;% filter(n &gt; 3000) %&gt;% 
+    ggplot(aes(x = reorder(class, n), y = n, fill = class)) + geom_bar(stat = &quot;identity&quot;, 
+    show.legend = FALSE) + labs(x = &quot;Class of Organism&quot;, y = &quot;Number of Occurrence Records (observations)&quot;) + 
+    coord_flip()</code></pre>
+<p><img src="gbif_files/figure-html/unnamed-chunk-1-1.png" width="672" /></p>
+<p>Ah… so that means 59.53% of our occurrence records for Kenya are for birds. While we have nothing against birds, this means that if we map the data later on the map will be flooded with Animalia data points for birds. We won’t do anything about this for the time being except that we could exclude all records using <code>dplyr</code> filter to show us all records that are not (<code>!=</code>) birds as summarised below.</p>
+<pre class="r"><code>library(dplyr)
+kenya_gbif %&gt;% filter(class != &quot;Aves&quot;) %&gt;% count(class, sort = TRUE)</code></pre>
+<pre><code>## # A tibble: 121 × 2
+##                 class     n
+##                 &lt;chr&gt; &lt;int&gt;
+## 1             Insecta 68932
+## 2            Mammalia 64124
+## 3       Magnoliopsida 48989
+## 4          Liliopsida 23984
+## 5            Amphibia 14510
+## 6            Reptilia 13383
+## 7      Actinopterygii  8964
+## 8          Gastropoda  4812
+## 9  Protosteliomycetes  3939
+## 10    Lecanoromycetes  3741
+## # ... with 111 more rows</code></pre>
+<p>We could save this to a new table with 277,681 occurrence records as follows.</p>
+<pre class="r"><code>library(dplyr)
+not_birds &lt;- filter(kenya_gbif, class != &quot;Aves&quot;)</code></pre>
+<p>We can also obtain an idea of who is providing taxonomic information about Kenya in the dataset through the institution code:</p>
+<pre class="r"><code>library(dplyr)
+kenya_gbif %&gt;% count(institutioncode, sort = TRUE)</code></pre>
+<pre><code>## # A tibble: 480 × 2
+##    institutioncode      n
+##              &lt;chr&gt;  &lt;int&gt;
+## 1              CLO 324964
+## 2            NHMUK  27729
+## 3        Naturalis  26439
+## 4             USNM  23677
+## 5             AMNH  22002
+## 6             FMNH  19703
+## 7             LACM  17607
+## 8              MCZ  11950
+## 9               MO  10279
+## 10               K  10067
+## # ... with 470 more rows</code></pre>
+<p>The interpretation of these institution codes requires further work (and an institution code may not be unique), so this is not very helpful at the moment.</p>
+<p>Other pieces of information that we might find useful are the locality (for text mining and matching with services such as <a href="http://www.geonames.org/">geonames</a> using <a href="http://tidytextmining.com/">tidy text mining</a>). Note that this data is pretty messy and would require extensive work to clean up. For that reason at present we do not propose to go further with this.</p>
+<pre class="r"><code>library(dplyr)
+kenya_gbif %&gt;% count(locality)</code></pre>
+<pre><code>## # A tibble: 56,895 × 2
+##                                                                  locality
+##                                                                     &lt;chr&gt;
+## 1                      B.E. Africa: on Tana River near base of Mt. Kenia 
+## 2                                  B.E.A., Africa, hills w. of Mt. Kenia 
+## 3    Mount Mbololo, Taita Hills,  Taita-Taveta District, Coastal Province
+## 4                                                                  Mrika 
+## 5                                                                       _
+## 6                                                                       -
+## 7                                                      - 64 km SW-Nairobi
+## 8                                                        - 64 SW. Nairobi
+## 9  - 830510 {Encyclopedia (46) - 160 - Seashells of Sri Lanka (81a) - 93}
+## 10                                  - Aberdare mountains, Gatamayu forest
+## # ... with 56,885 more rows, and 1 more variables: n &lt;int&gt;</code></pre>
+<p>We can also gain a limited insight into trends in the recording of occurrence data for Kenya through the year field. We will use the <code>ggplot2</code> package and <code>plotly</code> to draw a line graph that will display the values on hover. Records date back to 1758 but are sparse and have been limited to 1900 onwards while a total of 318 records were recorded in 2016 producing a data cliff and so we limit the data to 2015. Note that the overall year data is sparse with 99,000 occurrence records lacking a corresponding year.</p>
+<pre class="r"><code>library(tidyverse)
+library(plotly)
+out &lt;- kenya_gbif %&gt;% drop_na(year) %&gt;% count(year) %&gt;% ggplot(aes(x = year, 
+    y = n, group = 1)) + xlim(1900, 2015) + geom_line()
+plotly::ggplotly(out)</code></pre>
+<div id="htmlwidget-0e6925342f7d175eeef5" style="width:672px;height:480px;" class="plotly html-widget"></div>
+<script type="application/json" data-for="htmlwidget-0e6925342f7d175eeef5">{"x":{"data":[{"x":[1900,1901,1902,1903,1904,1905,1906,1907,1908,1909,1910,1911,1912,1913,1914,1915,1916,1917,1918,1919,1920,1921,1922,1923,1924,1925,1926,1927,1928,1929,1930,1931,1932,1933,1934,1935,1936,1937,1938,1939,1940,1941,1942,1943,1944,1945,1946,1947,1948,1949,1950,1951,1952,1953,1954,1955,1956,1957,1958,1959,1960,1961,1962,1963,1964,1965,1966,1967,1968,1969,1970,1971,1972,1973,1974,1975,1976,1977,1978,1979,1980,1981,1982,1983,1984,1985,1986,1987,1988,1989,1990,1991,1992,1993,1994,1995,1996,1997,1998,1999,2000,2001,2002,2003,2004,2005,2006,2007,2008,2009,2010,2011,2012,2013,2014,2015,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],"y":[1794,952,395,244,190,1059,2438,321,643,9911,1329,3776,3285,686,714,1715,1374,3307,2823,1125,3368,2018,1694,2876,1440,1085,598,683,314,1265,1498,1188,1037,523,3466,399,1067,735,1670,276,320,459,252,313,599,451,730,596,2282,3628,925,1191,1633,1591,664,666,1269,1165,2538,1329,3481,1791,3160,6461,6323,9260,4729,5029,5503,4644,6078,6034,6580,7180,7251,4097,5202,7686,5650,6994,2463,4743,3345,2326,6601,5498,4631,7833,5116,16155,5153,5462,4131,5661,4001,5240,6644,8103,7540,5893,9199,11505,14601,4465,5475,15155,15230,10413,9095,11759,11725,23505,22510,31993,35312,48171,45,1,2,10,4,21,1,9,1,1,2,4,1,6,1,2,1,1,2,2,2,1,3,1,1,1,1,7,2,1,1,3,1,1,2,1,3,4,1,1,4,1,1,2,3,7,2,161,170,4,1,5,1,1,16,24,20,24,240,202,145,60,169,56,81,46,412,298,416,324,308],"text":["year: 1900<br>n: 1794<br>1: 1","year: 1901<br>n: 952<br>1: 1","year: 1902<br>n: 395<br>1: 1","year: 1903<br>n: 244<br>1: 1","year: 1904<br>n: 190<br>1: 1","year: 1905<br>n: 1059<br>1: 1","year: 1906<br>n: 2438<br>1: 1","year: 1907<br>n: 321<br>1: 1","year: 1908<br>n: 643<br>1: 1","year: 1909<br>n: 9911<br>1: 1","year: 1910<br>n: 1329<br>1: 1","year: 1911<br>n: 3776<br>1: 1","year: 1912<br>n: 3285<br>1: 1","year: 1913<br>n: 686<br>1: 1","year: 1914<br>n: 714<br>1: 1","year: 1915<br>n: 1715<br>1: 1","year: 1916<br>n: 1374<br>1: 1","year: 1917<br>n: 3307<br>1: 1","year: 1918<br>n: 2823<br>1: 1","year: 1919<br>n: 1125<br>1: 1","year: 1920<br>n: 3368<br>1: 1","year: 1921<br>n: 2018<br>1: 1","year: 1922<br>n: 1694<br>1: 1","year: 1923<br>n: 2876<br>1: 1","year: 1924<br>n: 1440<br>1: 1","year: 1925<br>n: 1085<br>1: 1","year: 1926<br>n: 598<br>1: 1","year: 1927<br>n: 683<br>1: 1","year: 1928<br>n: 314<br>1: 1","year: 1929<br>n: 1265<br>1: 1","year: 1930<br>n: 1498<br>1: 1","year: 1931<br>n: 1188<br>1: 1","year: 1932<br>n: 1037<br>1: 1","year: 1933<br>n: 523<br>1: 1","year: 1934<br>n: 3466<br>1: 1","year: 1935<br>n: 399<br>1: 1","year: 1936<br>n: 1067<br>1: 1","year: 1937<br>n: 735<br>1: 1","year: 1938<br>n: 1670<br>1: 1","year: 1939<br>n: 276<br>1: 1","year: 1940<br>n: 320<br>1: 1","year: 1941<br>n: 459<br>1: 1","year: 1942<br>n: 252<br>1: 1","year: 1943<br>n: 313<br>1: 1","year: 1944<br>n: 599<br>1: 1","year: 1945<br>n: 451<br>1: 1","year: 1946<br>n: 730<br>1: 1","year: 1947<br>n: 596<br>1: 1","year: 1948<br>n: 2282<br>1: 1","year: 1949<br>n: 3628<br>1: 1","year: 1950<br>n: 925<br>1: 1","year: 1951<br>n: 1191<br>1: 1","year: 1952<br>n: 1633<br>1: 1","year: 1953<br>n: 1591<br>1: 1","year: 1954<br>n: 664<br>1: 1","year: 1955<br>n: 666<br>1: 1","year: 1956<br>n: 1269<br>1: 1","year: 1957<br>n: 1165<br>1: 1","year: 1958<br>n: 2538<br>1: 1","year: 1959<br>n: 1329<br>1: 1","year: 1960<br>n: 3481<br>1: 1","year: 1961<br>n: 1791<br>1: 1","year: 1962<br>n: 3160<br>1: 1","year: 1963<br>n: 6461<br>1: 1","year: 1964<br>n: 6323<br>1: 1","year: 1965<br>n: 9260<br>1: 1","year: 1966<br>n: 4729<br>1: 1","year: 1967<br>n: 5029<br>1: 1","year: 1968<br>n: 5503<br>1: 1","year: 1969<br>n: 4644<br>1: 1","year: 1970<br>n: 6078<br>1: 1","year: 1971<br>n: 6034<br>1: 1","year: 1972<br>n: 6580<br>1: 1","year: 1973<br>n: 7180<br>1: 1","year: 1974<br>n: 7251<br>1: 1","year: 1975<br>n: 4097<br>1: 1","year: 1976<br>n: 5202<br>1: 1","year: 1977<br>n: 7686<br>1: 1","year: 1978<br>n: 5650<br>1: 1","year: 1979<br>n: 6994<br>1: 1","year: 1980<br>n: 2463<br>1: 1","year: 1981<br>n: 4743<br>1: 1","year: 1982<br>n: 3345<br>1: 1","year: 1983<br>n: 2326<br>1: 1","year: 1984<br>n: 6601<br>1: 1","year: 1985<br>n: 5498<br>1: 1","year: 1986<br>n: 4631<br>1: 1","year: 1987<br>n: 7833<br>1: 1","year: 1988<br>n: 5116<br>1: 1","year: 1989<br>n: 16155<br>1: 1","year: 1990<br>n: 5153<br>1: 1","year: 1991<br>n: 5462<br>1: 1","year: 1992<br>n: 4131<br>1: 1","year: 1993<br>n: 5661<br>1: 1","year: 1994<br>n: 4001<br>1: 1","year: 1995<br>n: 5240<br>1: 1","year: 1996<br>n: 6644<br>1: 1","year: 1997<br>n: 8103<br>1: 1","year: 1998<br>n: 7540<br>1: 1","year: 1999<br>n: 5893<br>1: 1","year: 2000<br>n: 9199<br>1: 1","year: 2001<br>n: 11505<br>1: 1","year: 2002<br>n: 14601<br>1: 1","year: 2003<br>n: 4465<br>1: 1","year: 2004<br>n: 5475<br>1: 1","year: 2005<br>n: 15155<br>1: 1","year: 2006<br>n: 15230<br>1: 1","year: 2007<br>n: 10413<br>1: 1","year: 2008<br>n: 9095<br>1: 1","year: 2009<br>n: 11759<br>1: 1","year: 2010<br>n: 11725<br>1: 1","year: 2011<br>n: 23505<br>1: 1","year: 2012<br>n: 22510<br>1: 1","year: 2013<br>n: 31993<br>1: 1","year: 2014<br>n: 35312<br>1: 1","year: 2015<br>n: 48171<br>1: 1","year: NA<br>n: 45<br>1: 1","year: NA<br>n: 1<br>1: 1","year: NA<br>n: 2<br>1: 1","year: NA<br>n: 10<br>1: 1","year: NA<br>n: 4<br>1: 1","year: NA<br>n: 21<br>1: 1","year: NA<br>n: 1<br>1: 1","year: NA<br>n: 9<br>1: 1","year: NA<br>n: 1<br>1: 1","year: NA<br>n: 1<br>1: 1","year: NA<br>n: 2<br>1: 1","year: NA<br>n: 4<br>1: 1","year: NA<br>n: 1<br>1: 1","year: NA<br>n: 6<br>1: 1","year: NA<br>n: 1<br>1: 1","year: NA<br>n: 2<br>1: 1","year: NA<br>n: 1<br>1: 1","year: NA<br>n: 1<br>1: 1","year: NA<br>n: 2<br>1: 1","year: NA<br>n: 2<br>1: 1","year: NA<br>n: 2<br>1: 1","year: NA<br>n: 1<br>1: 1","year: NA<br>n: 3<br>1: 1","year: NA<br>n: 1<br>1: 1","year: NA<br>n: 1<br>1: 1","year: NA<br>n: 1<br>1: 1","year: NA<br>n: 1<br>1: 1","year: NA<br>n: 7<br>1: 1","year: NA<br>n: 2<br>1: 1","year: NA<br>n: 1<br>1: 1","year: NA<br>n: 1<br>1: 1","year: NA<br>n: 3<br>1: 1","year: NA<br>n: 1<br>1: 1","year: NA<br>n: 1<br>1: 1","year: NA<br>n: 2<br>1: 1","year: NA<br>n: 1<br>1: 1","year: NA<br>n: 3<br>1: 1","year: NA<br>n: 4<br>1: 1","year: NA<br>n: 1<br>1: 1","year: NA<br>n: 1<br>1: 1","year: NA<br>n: 4<br>1: 1","year: NA<br>n: 1<br>1: 1","year: NA<br>n: 1<br>1: 1","year: NA<br>n: 2<br>1: 1","year: NA<br>n: 3<br>1: 1","year: NA<br>n: 7<br>1: 1","year: NA<br>n: 2<br>1: 1","year: NA<br>n: 161<br>1: 1","year: NA<br>n: 170<br>1: 1","year: NA<br>n: 4<br>1: 1","year: NA<br>n: 1<br>1: 1","year: NA<br>n: 5<br>1: 1","year: NA<br>n: 1<br>1: 1","year: NA<br>n: 1<br>1: 1","year: NA<br>n: 16<br>1: 1","year: NA<br>n: 24<br>1: 1","year: NA<br>n: 20<br>1: 1","year: NA<br>n: 24<br>1: 1","year: NA<br>n: 240<br>1: 1","year: NA<br>n: 202<br>1: 1","year: NA<br>n: 145<br>1: 1","year: NA<br>n: 60<br>1: 1","year: NA<br>n: 169<br>1: 1","year: NA<br>n: 56<br>1: 1","year: NA<br>n: 81<br>1: 1","year: NA<br>n: 46<br>1: 1","year: NA<br>n: 412<br>1: 1","year: NA<br>n: 298<br>1: 1","year: NA<br>n: 416<br>1: 1","year: NA<br>n: 324<br>1: 1","year: NA<br>n: 308<br>1: 1"],"key":null,"type":"scatter","mode":"lines","name":"","line":{"width":1.88976377952756,"color":"rgba(0,0,0,1)","dash":"solid"},"hoveron":"points","showlegend":false,"xaxis":"x","yaxis":"y","hoverinfo":"text"}],"layout":{"margin":{"t":26.2283105022831,"r":7.30593607305936,"b":40.1826484018265,"l":54.7945205479452},"plot_bgcolor":"rgba(235,235,235,1)","paper_bgcolor":"rgba(255,255,255,1)","font":{"color":"rgba(0,0,0,1)","family":"","size":14.6118721461187},"xaxis":{"domain":[0,1],"type":"linear","autorange":false,"tickmode":"array","range":[1894.25,2020.75],"ticktext":["1900","1925","1950","1975","2000"],"tickvals":[1900,1925,1950,1975,2000],"ticks":"outside","tickcolor":"rgba(51,51,51,1)","ticklen":3.65296803652968,"tickwidth":0.66417600664176,"showticklabels":true,"tickfont":{"color":"rgba(77,77,77,1)","family":"","size":11.689497716895},"tickangle":-0,"showline":false,"linecolor":null,"linewidth":0,"showgrid":true,"gridcolor":"rgba(255,255,255,1)","gridwidth":0.66417600664176,"zeroline":false,"anchor":"y","title":"year","titlefont":{"color":"rgba(0,0,0,1)","family":"","size":14.6118721461187},"hoverformat":".2f"},"yaxis":{"domain":[0,1],"type":"linear","autorange":false,"tickmode":"array","range":[-2407.5,50579.5],"ticktext":["0","10000","20000","30000","40000","50000"],"tickvals":[0,10000,20000,30000,40000,50000],"ticks":"outside","tickcolor":"rgba(51,51,51,1)","ticklen":3.65296803652968,"tickwidth":0.66417600664176,"showticklabels":true,"tickfont":{"color":"rgba(77,77,77,1)","family":"","size":11.689497716895},"tickangle":-0,"showline":false,"linecolor":null,"linewidth":0,"showgrid":true,"gridcolor":"rgba(255,255,255,1)","gridwidth":0.66417600664176,"zeroline":false,"anchor":"x","title":"n","titlefont":{"color":"rgba(0,0,0,1)","family":"","size":14.6118721461187},"hoverformat":".2f"},"shapes":[{"type":"rect","fillcolor":null,"line":{"color":null,"width":0,"linetype":[]},"yref":"paper","xref":"paper","x0":0,"x1":1,"y0":0,"y1":1}],"showlegend":false,"legend":{"bgcolor":"rgba(255,255,255,1)","bordercolor":"transparent","borderwidth":1.88976377952756,"font":{"color":"rgba(0,0,0,1)","family":"","size":11.689497716895}},"hovermode":"closest"},"source":"A","config":{"modeBarButtonsToAdd":[{"name":"Collaborate","icon":{"width":1000,"ascent":500,"descent":-50,"path":"M487 375c7-10 9-23 5-36l-79-259c-3-12-11-23-22-31-11-8-22-12-35-12l-263 0c-15 0-29 5-43 15-13 10-23 23-28 37-5 13-5 25-1 37 0 0 0 3 1 7 1 5 1 8 1 11 0 2 0 4-1 6 0 3-1 5-1 6 1 2 2 4 3 6 1 2 2 4 4 6 2 3 4 5 5 7 5 7 9 16 13 26 4 10 7 19 9 26 0 2 0 5 0 9-1 4-1 6 0 8 0 2 2 5 4 8 3 3 5 5 5 7 4 6 8 15 12 26 4 11 7 19 7 26 1 1 0 4 0 9-1 4-1 7 0 8 1 2 3 5 6 8 4 4 6 6 6 7 4 5 8 13 13 24 4 11 7 20 7 28 1 1 0 4 0 7-1 3-1 6-1 7 0 2 1 4 3 6 1 1 3 4 5 6 2 3 3 5 5 6 1 2 3 5 4 9 2 3 3 7 5 10 1 3 2 6 4 10 2 4 4 7 6 9 2 3 4 5 7 7 3 2 7 3 11 3 3 0 8 0 13-1l0-1c7 2 12 2 14 2l218 0c14 0 25-5 32-16 8-10 10-23 6-37l-79-259c-7-22-13-37-20-43-7-7-19-10-37-10l-248 0c-5 0-9-2-11-5-2-3-2-7 0-12 4-13 18-20 41-20l264 0c5 0 10 2 16 5 5 3 8 6 10 11l85 282c2 5 2 10 2 17 7-3 13-7 17-13z m-304 0c-1-3-1-5 0-7 1-1 3-2 6-2l174 0c2 0 4 1 7 2 2 2 4 4 5 7l6 18c0 3 0 5-1 7-1 1-3 2-6 2l-173 0c-3 0-5-1-8-2-2-2-4-4-4-7z m-24-73c-1-3-1-5 0-7 2-2 3-2 6-2l174 0c2 0 5 0 7 2 3 2 4 4 5 7l6 18c1 2 0 5-1 6-1 2-3 3-5 3l-174 0c-3 0-5-1-7-3-3-1-4-4-5-6z"},"click":"function(gd) { \n        // is this being viewed in RStudio?\n        if (location.search == '?viewer_pane=1') {\n          alert('To learn about plotly for collaboration, visit:\\n https://cpsievert.github.io/plotly_book/plot-ly-for-collaboration.html');\n        } else {\n          window.open('https://cpsievert.github.io/plotly_book/plot-ly-for-collaboration.html', '_blank');\n        }\n      }"}],"modeBarButtonsToRemove":["sendDataToCloud"]},"base_url":"https://plot.ly"},"evals":["config.modeBarButtonsToAdd.0.click"],"jsHooks":[]}</script>
+<p>While the data is limited, this graph suggest that GBIF occurrence records is entered in bursts of activity.</p>
+<p>Understanding the structure of the occurrence data from GBIF is important for three reasons.</p>
+<ol style="list-style-type: decimal">
+<li><p>Occurrence data contains records for the occurrences of species which means, as we saw above, that there will be multiple records for the same species name. We will often want to summarise this data down to the species, kingdom, family, genus etc. for further work.</p></li>
+<li><p>When engaging in monitoring activity we will typically want to generate geographic maps with the occurrence data where we will need latitude and longitude coordinates. Higher order taxonranks such as genera, families, order etc. do not logically have coordinates. So we will want to filter the data to only those records that have coordinates (species). In practice that means that we will want a data table with each of the species level coordinates along possibly with subspecies and variety data (not included below).</p></li>
+<li><p>If we attempt to map the data, the map may be flooded by data for species that have high frequency observation records… notably birds. Depending on our purposes we may want to either include or exclude this data.</p></li>
+</ol>
+<p>To do that we will now create two main tables:</p>
+<ol style="list-style-type: decimal">
+<li>One for species</li>
+<li>One for species occurrences</li>
+</ol>
+</div>
+<div id="creating-a-species-table" class="section level3">
+<h3>Creating a Species Table</h3>
+<p>For the species table we will want to reduce the records to one record per species.</p>
+<p>This is straightforward. We start by filtering the rows with the species taxonrank and then deduplicate using <code>distinct()</code>. Note that this could probably be done more directly by applying distinct without filtering first but produced lower results.</p>
+<pre class="r"><code>library(tidyverse)
+kenya_species &lt;- kenya_gbif %&gt;% filter(taxonrank == &quot;SPECIES&quot;) %&gt;% distinct(species, 
+    .keep_all = TRUE)
+kenya_species</code></pre>
+<pre><code>## # A tibble: 18,131 × 44
+##    gbifid                           datasetkey       occurrenceid
+##     &lt;int&gt;                                &lt;chr&gt;              &lt;chr&gt;
+## 1   11010 85685a84-f762-11e1-a439-00145eb45e9a               &lt;NA&gt;
+## 2   31186 85685a84-f762-11e1-a439-00145eb45e9a               &lt;NA&gt;
+## 3   43892 c2e3081a-ba91-40cf-b2df-9885a24b37dc NRM:NRM-Fish:24219
+## 4   44680 c2e3081a-ba91-40cf-b2df-9885a24b37dc NRM:NRM-Fish:50464
+## 5   45140 c2e3081a-ba91-40cf-b2df-9885a24b37dc  NRM:NRM-Fish:9227
+## 6   50852 c2e3081a-ba91-40cf-b2df-9885a24b37dc  NRM:NRM-Fish:9226
+## 7   50856 c2e3081a-ba91-40cf-b2df-9885a24b37dc  NRM:NRM-Fish:9230
+## 8   50861 c2e3081a-ba91-40cf-b2df-9885a24b37dc  NRM:NRM-Fish:9237
+## 9   50914 c2e3081a-ba91-40cf-b2df-9885a24b37dc NRM:NRM-Fish:10967
+## 10  51295 c2e3081a-ba91-40cf-b2df-9885a24b37dc NRM:NRM-Fish:24215
+## # ... with 18,121 more rows, and 41 more variables: kingdom &lt;chr&gt;,
+## #   phylum &lt;chr&gt;, class &lt;chr&gt;, order &lt;chr&gt;, family &lt;chr&gt;, genus &lt;chr&gt;,
+## #   species &lt;chr&gt;, infraspecificepithet &lt;chr&gt;, taxonrank &lt;chr&gt;,
+## #   scientificname &lt;chr&gt;, countrycode &lt;chr&gt;, locality &lt;chr&gt;,
+## #   publishingorgkey &lt;chr&gt;, decimallatitude &lt;dbl&gt;, decimallongitude &lt;dbl&gt;,
+## #   coordinateuncertaintyinmeters &lt;dbl&gt;, coordinateprecision &lt;dbl&gt;,
+## #   elevation &lt;dbl&gt;, elevationaccuracy &lt;dbl&gt;, depth &lt;dbl&gt;,
+## #   depthaccuracy &lt;dbl&gt;, eventdate &lt;chr&gt;, day &lt;int&gt;, month &lt;int&gt;,
+## #   year &lt;int&gt;, taxonkey &lt;int&gt;, specieskey &lt;int&gt;, basisofrecord &lt;chr&gt;,
+## #   institutioncode &lt;chr&gt;, collectioncode &lt;chr&gt;, catalognumber &lt;chr&gt;,
+## #   recordnumber &lt;chr&gt;, identifiedby &lt;chr&gt;, license &lt;chr&gt;,
+## #   rightsholder &lt;chr&gt;, recordedby &lt;chr&gt;, typestatus &lt;chr&gt;,
+## #   establishmentmeans &lt;chr&gt;, lastinterpreted &lt;chr&gt;, mediatype &lt;chr&gt;,
+## #   issue &lt;chr&gt;</code></pre>
+<p>This approach has the advantage (by specifying <code>.keep_all = TRUE</code>) of keeping one example of the associated kingdom and other data per occurrence record. Note however that in some instances GBIF may record the same species in different genera, families or kingdoms. So, bear this in mind if you suddenly discover that a plant is recorded as an animal.</p>
+<p>If we simply wanted a list of unique species names we could change the <code>.keep_all</code> to FALSE (the default).</p>
+<pre class="r"><code>library(tidyverse)
+kenya_species_only &lt;- kenya_gbif %&gt;% filter(taxonrank == &quot;SPECIES&quot;) %&gt;% distinct(species, 
+    .keep_all = FALSE)
+kenya_species_only</code></pre>
+<pre><code>## # A tibble: 18,131 × 1
+##                   species
+##                     &lt;chr&gt;
+## 1      Amphora kenyaensis
+## 2     Melosira nyassensis
+## 3  Mastacembelus frenatus
+## 4      Acropoma japonicum
+## 5       Amphilius grandis
+## 6       Bagrus orientalis
+## 7      Barbus oxyrhynchus
+## 8        Barbus neumayeri
+## 9            Barbus mimus
+## 10          Bagrus docmak
+## # ... with 18,121 more rows</code></pre>
+<p>Note that when the table is deduplicated by occurrence it will retain one occurrence record per name. As this is not meaningful and could create confusion it probably makes sense to drop many of the columns.</p>
+<p>An easy way to drop columns is to use the <code>dplyr</code> <code>select()</code> function. By default <code>select()</code> will drop columns that are not named. Here, for illustration only, we would keep columns 1 and 4 to 14 and drop the rest.</p>
+<pre class="r"><code>library(tidyverse)
+kenya_species %&gt;% select(1, 4:14)</code></pre>
+<p>Dropping columns that contain incomplete information can help you to avoid using inaccurate data. In other cases, the species table can be regarded as containing sample occurrence data (one per species) and that might be useful for small scale testing (for example for mapping tests). You can find a file of this type in data as <code>kenya_species_distinct.rda</code> and a file with just the species names as <code>kenya_species</code>.</p>
+<p>We can now take a quick look at the numbers of species by kingdom.</p>
+<pre class="r"><code>library(dplyr)
+kenya_species %&gt;% drop_na(kingdom) %&gt;% count(kingdom, sort = TRUE) %&gt;% ggplot(aes(x = reorder(kingdom, 
+    n), y = n, fill = kingdom)) + geom_bar(stat = &quot;identity&quot;, show.legend = FALSE) + 
+    labs(x = &quot;Kingdom&quot;, y = &quot;Number of Species&quot;) + coord_flip()</code></pre>
+<p><img src="gbif_files/figure-html/count_species_kingdom-1.png" width="672" /></p>
+<p>We have seen above that the Kenya occurrence records are dominated by observations of birds. Using our species table let’s take a quick look at classes of organism by numbers of species. We will limit the data to those classes containing more than 50 species.</p>
+<pre class="r"><code>library(dplyr)
+kenya_species %&gt;% drop_na(class) %&gt;% count(class, sort = TRUE) %&gt;% filter(n &gt; 
+    50) %&gt;% ggplot(aes(x = reorder(class, n), y = n, fill = class)) + geom_bar(stat = &quot;identity&quot;, 
+    show.legend = FALSE) + labs(x = &quot;Class&quot;, y = &quot;Number of Species&quot;) + coord_flip()</code></pre>
+<p><img src="gbif_files/figure-html/count_species-1.png" width="672" /></p>
+<p>As we can see, for Kenya the highest number of species are a class of flowering plants followed by insects. While responsible for nearly 60% of the occurrence records, birds rank fifth in counts of numbers of species.</p>
+<p>The creation of a species table creates a basis for monitoring through the use of the species names in search queries or for text mining the scientific literature and patent literature.</p>
+<p>There are 18,131 species names in this dataset. We might also want to generate a genus names list as a shorter list for use in queries or text mining.</p>
+<pre class="r"><code>library(dplyr)
+library(tidyr)
+kenya_genus &lt;- kenya_species %&gt;% drop_na(genus) %&gt;% count(genus, sort = TRUE)
+kenya_genus</code></pre>
+<pre><code>## # A tibble: 6,923 × 2
+##           genus     n
+##           &lt;chr&gt; &lt;int&gt;
+## 1     Euphorbia   124
+## 2    Crotalaria    89
+## 3       Cyperus    80
+## 4       Solanum    80
+## 5         Dacus    72
+## 6     Asplenium    63
+## 7    Parmotrema    63
+## 8  Haplochromis    61
+## 9    Indigofera    60
+## 10   Eragrostis    59
+## # ... with 6,913 more rows</code></pre>
+<p>This reveals that there are 6923 in the species data with Euphorbia ranking top .</p>
+</div>
+<div id="creating-an-occurrence-table" class="section level3">
+<h3>Creating an Occurrence Table</h3>
+<p>Having created a species table we now need an occurrence table. In this case we want the species records and the coordinates per record. Note that we may also be interested in occurrence records for subspecies and varities although we will focus only on species here.</p>
+<pre class="r"><code>library(dplyr)
+kenya_occurrence &lt;- kenya_gbif %&gt;% filter(taxonrank == &quot;SPECIES&quot;)</code></pre>
+<p>When we come to map the data later on we will discover that not all species records have latitude and longitude records and some are incorrect. This will result in errors when we attempt to map the data with <code>leaflet</code> or another mapping package such as <code>ggmap</code>.</p>
+<p>We can test for NA values in the <code>decimallatitude</code> column using <code>is.na()</code>.</p>
+<pre class="r"><code>library(dplyr)
+is.na(kenya_occurrence$decimallatitude) %&gt;% head(100)</code></pre>
+<pre><code>##   [1] TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE
+##  [15] TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE
+##  [29] TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE
+##  [43] TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE
+##  [57] TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE
+##  [71] TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE
+##  [85] TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE
+##  [99] TRUE TRUE</code></pre>
+<p>To address this we need to remove records with incomplete latitude or longitude. In this case we can use the very easy <code>drop_na()</code> function from <code>tidyr</code>. This will reduce our species occurrence dataset from 566020 rows to 444,228. Note that in this dataset there appear to be no cases where there are NA rows in longitude that are not also in latitude. We will however, anticipate that possibility in the code below.</p>
+<pre class="r"><code>library(tidyr)
+kenya_occurrence &lt;- kenya_occurrence %&gt;% drop_na(decimallatitude) %&gt;% drop_na(decimallongitude)
+kenya_occurrence</code></pre>
+<pre><code>## # A tibble: 444,228 × 44
+##    gbifid                           datasetkey       occurrenceid kingdom
+##     &lt;int&gt;                                &lt;chr&gt;              &lt;chr&gt;   &lt;chr&gt;
+## 1  653826 aab0cf80-0c64-11dd-84d1-b8a03c50a862 LD:General:1022220   Fungi
+## 2  664444 aab0cf80-0c64-11dd-84d1-b8a03c50a862 LD:General:1087200   Fungi
+## 3  664565 aab0cf80-0c64-11dd-84d1-b8a03c50a862 LD:General:1093998   Fungi
+## 4  673178 aab0cf80-0c64-11dd-84d1-b8a03c50a862 LD:General:1067838   Fungi
+## 5  673247 aab0cf80-0c64-11dd-84d1-b8a03c50a862 LD:General:1069054   Fungi
+## 6  693924 aab0cf80-0c64-11dd-84d1-b8a03c50a862 LD:General:1014486 Plantae
+## 7  693932 aab0cf80-0c64-11dd-84d1-b8a03c50a862 LD:General:1014742 Plantae
+## 8  710816 aab0cf80-0c64-11dd-84d1-b8a03c50a862 LD:General:1092127   Fungi
+## 9  722336 aab0cf80-0c64-11dd-84d1-b8a03c50a862 LD:General:1028374 Plantae
+## 10 859219 aab0cf80-0c64-11dd-84d1-b8a03c50a862 LD:General:1010326 Plantae
+## # ... with 444,218 more rows, and 40 more variables: phylum &lt;chr&gt;,
+## #   class &lt;chr&gt;, order &lt;chr&gt;, family &lt;chr&gt;, genus &lt;chr&gt;, species &lt;chr&gt;,
+## #   infraspecificepithet &lt;chr&gt;, taxonrank &lt;chr&gt;, scientificname &lt;chr&gt;,
+## #   countrycode &lt;chr&gt;, locality &lt;chr&gt;, publishingorgkey &lt;chr&gt;,
+## #   decimallatitude &lt;dbl&gt;, decimallongitude &lt;dbl&gt;,
+## #   coordinateuncertaintyinmeters &lt;dbl&gt;, coordinateprecision &lt;dbl&gt;,
+## #   elevation &lt;dbl&gt;, elevationaccuracy &lt;dbl&gt;, depth &lt;dbl&gt;,
+## #   depthaccuracy &lt;dbl&gt;, eventdate &lt;chr&gt;, day &lt;int&gt;, month &lt;int&gt;,
+## #   year &lt;int&gt;, taxonkey &lt;int&gt;, specieskey &lt;int&gt;, basisofrecord &lt;chr&gt;,
+## #   institutioncode &lt;chr&gt;, collectioncode &lt;chr&gt;, catalognumber &lt;chr&gt;,
+## #   recordnumber &lt;chr&gt;, identifiedby &lt;chr&gt;, license &lt;chr&gt;,
+## #   rightsholder &lt;chr&gt;, recordedby &lt;chr&gt;, typestatus &lt;chr&gt;,
+## #   establishmentmeans &lt;chr&gt;, lastinterpreted &lt;chr&gt;, mediatype &lt;chr&gt;,
+## #   issue &lt;chr&gt;</code></pre>
+</div>
+<div id="gbif-issues" class="section level3">
+<h3>GBIF Issues</h3>
+<p>GBIF data contains an issue column that lists known issues with the data.</p>
+<pre class="r"><code>library(dplyr)
+kenya_occurrence %&gt;% select(issue) %&gt;% head()</code></pre>
+<pre><code>## # A tibble: 6 × 1
+##                                             issue
+##                                             &lt;chr&gt;
+## 1 COORDINATE_ROUNDED;GEODETIC_DATUM_ASSUMED_WGS84
+## 2 COORDINATE_ROUNDED;GEODETIC_DATUM_ASSUMED_WGS84
+## 3 COORDINATE_ROUNDED;GEODETIC_DATUM_ASSUMED_WGS84
+## 4 COORDINATE_ROUNDED;GEODETIC_DATUM_ASSUMED_WGS84
+## 5 COORDINATE_ROUNDED;GEODETIC_DATUM_ASSUMED_WGS84
+## 6 COORDINATE_ROUNDED;GEODETIC_DATUM_ASSUMED_WGS84</code></pre>
+<p>These issues may matter to you for a variety of reasons. When mapping GBIF data pay particular attention to the GEODETIC issue notes.</p>
+<p>A vignette on <a href="https://github.com/ropensci/rgbif/blob/master/vignettes/issues_vignette.Rmd">cleaning up GBIF data</a> is provided with the <code>rgbif</code> package and it is recommended reading.</p>
+<p>To View the GBIF issues table run <code>gbif_issues()</code> or view the web page <a href="http://gbif.github.io/gbif-api/apidocs/org/gbif/api/vocabulary/OccurrenceIssue.html">here</a></p>
+<pre class="r"><code>library(rgbif)
+gbif_issues()</code></pre>
+<pre><code>##         code                              issue
+## 1        bri            BASIS_OF_RECORD_INVALID
+## 2        ccm         CONTINENT_COUNTRY_MISMATCH
+## 3        cdc CONTINENT_DERIVED_FROM_COORDINATES
+## 4      conti                  CONTINENT_INVALID
+## 5       cdiv                 COORDINATE_INVALID
+## 6      cdout            COORDINATE_OUT_OF_RANGE
+## 7      cdrep             COORDINATE_REPROJECTED
+## 8     cdrepf     COORDINATE_REPROJECTION_FAILED
+## 9     cdreps COORDINATE_REPROJECTION_SUSPICIOUS
+## 10   cdround                 COORDINATE_ROUNDED
+## 11   cucdmis        COUNTRY_COORDINATE_MISMATCH
+## 12      cudc   COUNTRY_DERIVED_FROM_COORDINATES
+## 13      cuiv                    COUNTRY_INVALID
+## 14       cum                   COUNTRY_MISMATCH
+## 15    depmms              DEPTH_MIN_MAX_SWAPPED
+## 16     depnn                  DEPTH_NON_NUMERIC
+## 17   depnmet                   DEPTH_NOT_METRIC
+## 18    depunl                     DEPTH_UNLIKELY
+## 19     elmms          ELEVATION_MIN_MAX_SWAPPED
+## 20      elnn              ELEVATION_NON_NUMERIC
+## 21    elnmet               ELEVATION_NOT_METRIC
+## 22     elunl                 ELEVATION_UNLIKELY
+## 23    gass84       GEODETIC_DATUM_ASSUMED_WGS84
+## 24    gdativ             GEODETIC_DATUM_INVALID
+## 25   iddativ            IDENTIFIED_DATE_INVALID
+## 26  iddatunl           IDENTIFIED_DATE_UNLIKELY
+## 27    mdativ              MODIFIED_DATE_INVALID
+## 28   mdatunl             MODIFIED_DATE_UNLIKELY
+## 29  muldativ            MULTIMEDIA_DATE_INVALID
+## 30  muluriiv             MULTIMEDIA_URI_INVALID
+## 31 preneglat          PRESUMED_NEGATED_LATITUDE
+## 32 preneglon         PRESUMED_NEGATED_LONGITUDE
+## 33   preswcd        PRESUMED_SWAPPED_COORDINATE
+## 34    rdativ              RECORDED_DATE_INVALID
+## 35     rdatm             RECORDED_DATE_MISMATCH
+## 36   rdatunl             RECORDED_DATE_UNLIKELY
+## 37  refuriiv             REFERENCES_URI_INVALID
+## 38  txmatfuz                  TAXON_MATCH_FUZZY
+## 39   txmathi             TAXON_MATCH_HIGHERRANK
+## 40  txmatnon                   TAXON_MATCH_NONE
+## 41 typstativ                TYPE_STATUS_INVALID
+## 42    zerocd                    ZERO_COORDINATE
+##                                                                                                                                                        description
+## 1                                                     The given basis of record is impossible to interpret or seriously different from the recommended vocabulary.
+## 2                                                                                                           The interpreted continent and country do not match up.
+## 3                                                                      The interpreted continent is based on the coordinates, not the verbatim string information.
+## 4                                                                                                                          Uninterpretable continent values found.
+## 5                                                                                          Coordinate value given in some form but GBIF is unable to interpret it.
+## 6                                                                                            Coordinate has invalid lat/lon values out of their decimal max range.
+## 7                                                                   The original coordinate was successfully reprojected from a different geodetic datum to WGS84.
+## 8                                                          The given decimal latitude and longitude could not be reprojected to WGS84 based on the provided datum.
+## 9                    Indicates successful coordinate reprojection according to provided datum, but which results in a datum shift larger than 0.1 decimal degrees.
+## 10                                                                                                         Original coordinate modified by rounding to 5 decimals.
+## 11                                                                                   The interpreted occurrence coordinates fall outside of the indicated country.
+## 12                                                                       The interpreted country is based on the coordinates, not the verbatim string information.
+## 13                                                                                                                           Uninterpretable country values found.
+## 14                                                                                  Interpreted country for dwc:country and dwc:countryCode contradict each other.
+## 15                                                                                                                                         Set if supplied min&gt;max
+## 16                                                                                                                             Set if depth is a non numeric value
+## 17                                                               Set if supplied depth is not given in the metric system, for example using feet instead of meters
+## 18                                                                                                                Set if depth is larger than 11.000m or negative.
+## 19                                                                                                                             Set if supplied min &gt; max elevation
+## 20                                                                                                                         Set if elevation is a non numeric value
+## 21                                                           Set if supplied elevation is not given in the metric system, for example using feet instead of meters
+## 22                                                                                Set if elevation is above the troposphere (17km) or below 11km (Mariana Trench).
+## 23                        Indicating that the interpreted coordinates assume they are based on WGS84 datum as the datum was either not indicated or interpretable.
+## 24                                                                                                              The geodetic datum given could not be interpreted.
+## 25                                                                                The date given for dwc:dateIdentified is invalid and cant be interpreted at all.
+## 26                                                                          The date given for dwc:dateIdentified is in the future or before Linnean times (1700).
+## 27                                                        A (partial) invalid date is given for dc:modified, such as a non existing date, invalid zero month, etc.
+## 28                                                                                   The date given for dc:modified is in the future or predates unix time (1970).
+## 29                                                                                                 An invalid date is given for dc:created of a multimedia object.
+## 30                                                                                                                An invalid uri is given for a multimedia object.
+## 31                                                                                                      Latitude appears to be negated, e.g. 32.3 instead of -32.3
+## 32                                                                                                     Longitude appears to be negated, e.g. 32.3 instead of -32.3
+## 33                                                                                                                    Latitude and longitude appear to be swapped.
+## 34                                                                        A (partial) invalid date is given, such as a non existing date, invalid zero month, etc.
+## 35                                                     The recording date specified as the eventDate string and the individual year, month, day are contradicting.
+## 36                  The recording date is highly unlikely, falling either into the future or represents a very old date before 1600 that predates modern taxonomy.
+## 37                                                                                                                      An invalid uri is given for dc:references.
+## 38                                                                             Matching to the taxonomic backbone can only be done using a fuzzy, non exact match.
+## 39                                                               Matching to the taxonomic backbone can only be done on a higher rank and not the scientific name.
+## 40 Matching to the taxonomic backbone cannot be done cause there was no match at all or several matches with too little information to keep them apart (homonyms).
+## 41                                                        The given type status is impossible to interpret or seriously different from the recommended vocabulary.
+## 42                                                                                 Coordinate is the exact 0/0 coordinate, often indicating a bad null coordinate.</code></pre>
+<p>A common issue with GBIF occurrences is that the World Geodetic System (WGS84) reference coordinates are assumed.</p>
+<p>We will deal with coordinate issues in the discussion of mapping GBIF data.</p>
+</div>
+<div id="round-up" class="section level3">
+<h3>Round Up</h3>
+<p>GBIF is a powerful tool for obtaining taxonomic information about biodiversity in a country or a region. GBIF data is available as either a simple .csv file or as Darwin Core format records. In this walk through we have focused on the simple .csv data. That data can be easily be processed to generate species lists with known occurrences in a country, summary data and occurrence tables with coordinates for mapping.</p>
+<p>It is important to bear in mind that GBIF data is inevitably incomplete and depends on contributions from GBIF contributors within and outside a country. However, for monitoring purposes under the Nagoya Protocol it is the single most accessible database for information about biodiversity. As such it is critically important.</p>
+<p>In this walk through we started with a raw dataset of 700,168 records. We then did three things.</p>
+<ol style="list-style-type: decimal">
+<li>We generated quick summaries of the data</li>
+<li>We filtered the data to create a species list with known occurrences in Kenya.</li>
+<li>We filtered the occurrence records to data containing coordinates.</li>
+</ol>
+<p>It is important to emphasise that there are a variety of other important data fields such as those containing ids (allowing for the creation of links to wider records) and fields such as the locality which could be used in mapping or text mining. It is also possible to do a lot more with the <code>rgbif</code> package and related <code>taxize</code> package than we have covered in this walk through.</p>
+<p>In the next article we will map the <code>gbif</code> occurrence data using the <code>leaflet</code> javascript library to generate an interactive map.</p>
+</div>
+
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

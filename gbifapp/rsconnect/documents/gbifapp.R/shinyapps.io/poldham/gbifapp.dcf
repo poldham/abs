@@ -1,0 +1,10 @@
+name: gbifapp
+title: gbifapp
+account: poldham
+server: shinyapps.io
+appId: 158831
+bundleId: 726925
+url: https://poldham.shinyapps.io/gbifapp/
+when: 1488215858.71131
+asMultiple: FALSE
+asStatic: FALSE

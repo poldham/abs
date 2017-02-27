@@ -1,0 +1,933 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+
+<meta name="author" content="Paul Oldham" />
+
+
+<title>Mapping and Monitoring with Geonames</title>
+
+<script src="site_libs/jquery-1.12.4/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/bootstrap.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="site_libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
+<link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<link href="site_libs/highlightjs-1.1/default.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-1.1/highlight.js"></script>
+<script src="site_libs/htmlwidgets-0.8/htmlwidgets.js"></script>
+<link href="site_libs/leaflet-0.7.7/leaflet.css" rel="stylesheet" />
+<script src="site_libs/leaflet-0.7.7/leaflet.js"></script>
+<link href="site_libs/leafletfix-1.0.0/leafletfix.css" rel="stylesheet" />
+<link href="site_libs/leaflet-label-0.2.2/leaflet.label.css" rel="stylesheet" />
+<script src="site_libs/leaflet-label-0.2.2/leaflet.label.js"></script>
+<script src="site_libs/Proj4Leaflet-0.7.2/proj4-compressed.js"></script>
+<script src="site_libs/Proj4Leaflet-0.7.2/proj4leaflet.js"></script>
+<script src="site_libs/leaflet-binding-1.1.0/leaflet.js"></script>
+<link href="site_libs/leaflet-markercluster-0.5.0/MarkerCluster.css" rel="stylesheet" />
+<link href="site_libs/leaflet-markercluster-0.5.0/MarkerCluster.Default.css" rel="stylesheet" />
+<script src="site_libs/leaflet-markercluster-0.5.0/leaflet.markercluster.js"></script>
+<script src="site_libs/leaflet-markercluster-0.5.0/leaflet.markercluster.layersupport-src.js"></script>
+<script src="site_libs/leaflet-markercluster-0.5.0/leaflet.markercluster.freezable-src.js"></script>
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs && document.readyState && document.readyState === "complete") {
+   window.setTimeout(function() {
+      hljs.initHighlighting();
+   }, 0);
+}
+</script>
+
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+
+</head>
+
+<body>
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+  height: auto;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+</style>
+
+
+<style type="text/css">
+/* padding for bootstrap navbar */
+body {
+  padding-top: 51px;
+  padding-bottom: 40px;
+}
+/* offset scroll position for anchor links (for fixed navbar)  */
+.section h1 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+
+.section h2 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h3 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h4 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h5 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h6 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+</style>
+
+<script>
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark it active
+  menuAnchor.parent().addClass('active');
+
+  // if it's got a parent navbar menu mark it active as well
+  menuAnchor.closest('li.dropdown').addClass('active');
+});
+</script>
+
+
+<div class="container-fluid main-container">
+
+<!-- tabsets -->
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+</script>
+
+<!-- code folding -->
+
+
+
+
+<script>
+$(document).ready(function ()  {
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_').toLowerCase();
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+  padding-left: 25px;
+  text-indent: 0;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row-fluid">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">Handbook on ABS Monitoring</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">Introduction</a>
+</li>
+<li>
+  <a href="gettingstarted.html">Getting Started</a>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    Working with Taxonomic Data
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="gbif.html">Accessing GBIF</a>
+    </li>
+    <li>
+      <a href="mapgbif.html">Mapping GBIF Data</a>
+    </li>
+  </ul>
+</li>
+<li>
+  <a href="crossref.html">Accessing Scientific Literature</a>
+</li>
+<li>
+  <a href="geonames.html">Mapping with Geonames</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div class="fluid-row" id="header">
+
+
+
+<h1 class="title toc-ignore">Mapping and Monitoring with Geonames</h1>
+<h4 class="author"><em>Paul Oldham</em></h4>
+
+</div>
+
+
+<div id="introduction" class="section level2">
+<h2>Introduction</h2>
+<p>In this section we will focus on using the <a href="http://www.geonames.org/">Geonames</a> service to identify the coordinates for place names in Kenya. We will then take a subset of coordinates for Kenya using the example of lakes, ponds and lagoons. Finally, we will use <code>leaflet</code> to create interactive maps of the data and create a hyperlink to search the patent literature and other literature sources.</p>
+<p>Our aim in this walk through is to produce this map as an interactive map that will allows the reader to zoom in, select a marker and look up patents and literature linked to lakes in Kenya.</p>
+<div class="figure">
+<img src="images/geonames/final_map.png" />
+
+</div>
+<p>By the end of this section you will be able to access geonames, filter the data down to the subjects you are interested in, and create an interactive hyperlinked map with leaflet.</p>
+<div id="about-geonames" class="section level3">
+<h3>About geonames</h3>
+<p><a href="http://www.geonames.org/">Geonames</a> is a deceptively simple service that provides free access to the coordinates and related information for 11 million places around the world. As such, it is the world’s biggest open access repository for coordinate data.</p>
+<div class="figure">
+<img src="images/geonames/GeoNames_frontpage.png" />
+
+</div>
+<p>There are a variety of ways of obtaining information from geonames, including the geonames web service. If you only want to work on data from a specific country, one of the easiest ways to obtain the data is by downloading it from the country data dump.</p>
+<div class="figure">
+<img src="images/geonames/GeoNames_2017-0127_14-40-15.png" />
+
+</div>
+<p>As an alternative we can access the geonames service using the API through packages such as <code>geonames</code> in R. There are a wide variety of existing clients that are listed on the <a href="http://www.geonames.org/export/client-libraries.html">geonames client libraries</a> page.</p>
+<pre class="r"><code>install.packages(&quot;geonames&quot;)</code></pre>
+<p>To work with the geonames package you will need to sign up for a free account and take a note of your username or it will not work.</p>
+<pre class="r"><code>library(geonames)
+options(geonamesUsername=&quot;yourid&quot;)</code></pre>
+<p>To get started we need to find the Geoname Id for Kenya (KE)</p>
+<pre class="r"><code>library(geonames)
+options(geonamesUsername=&quot;yourid&quot;)
+GN_kenya &lt;- GNcountryInfo(&quot;KE&quot;)</code></pre>
+<pre class="r"><code>head(GN_kenya)</code></pre>
+<pre><code>##   continent capital   languages geonameId     south isoAlpha3    north
+## 1        AF Nairobi en-KE,sw-KE    192950 -4.678047       KEN 5.019938
+##   fipsCode population      east isoNumeric areaInSqKm countryCode
+## 1       KE   40046566 41.899078        404   582650.0          KE
+##        west       countryName continentName currencyCode
+## 1 33.908859 Republic of Kenya        Africa          KES</code></pre>
+<p>Next it will be useful to have the administrative data which we can find using the geonames id with GN children.</p>
+<pre class="r"><code>library(geonames)
+options(geonamesUsername=&quot;yourid&quot;)
+GN_kenya_children &lt;- GNchildren(192950)</code></pre>
+<pre class="r"><code>head(GN_kenya_children)</code></pre>
+<pre><code>##   adminCode1    lng geonameId      toponymName countryId fcl population
+## 1         10     36    200573          Baringo    192950   A     555561
+## 2         11  35.35   7667666            Bomet    192950   A     724186
+## 3         12 34.639    200066          Bungoma    192950   A    1630934
+## 4         13  34.17    199987            Busia    192950   A     488075
+## 5         14  35.55   7667646 Elegeyo-Marakwet    192950   A     369998
+## 6         15 37.531    198474             Embu    192950   A     516212
+##   countryCode             name                    fclName countryName
+## 1          KE          Baringo country, state, region,...       Kenya
+## 2          KE            Bomet country, state, region,...       Kenya
+## 3          KE          Bungoma country, state, region,...       Kenya
+## 4          KE            Busia country, state, region,...       Kenya
+## 5          KE Elegeyo-Marakwet country, state, region,...       Kenya
+## 6          KE             Embu country, state, region,...       Kenya
+##                             fcodeName       adminName1     lat fcode
+## 1 first-order administrative division          Baringo 0.66667  ADM1
+## 2 first-order administrative division            Bomet   -0.79  ADM1
+## 3 first-order administrative division          Bungoma    0.66  ADM1
+## 4 first-order administrative division            Busia    0.35  ADM1
+## 5 first-order administrative division Elegeyo-Marakwet    0.99  ADM1
+## 6 first-order administrative division             Embu  -0.425  ADM1
+##   numberOfChildren
+## 1             &lt;NA&gt;
+## 2             &lt;NA&gt;
+## 3             &lt;NA&gt;
+## 4                1
+## 5             &lt;NA&gt;
+## 6                1</code></pre>
+<p>This produces a table that contains the administrative divisions for Kenya. We can then drill down into this data by selecting the geoname id for an administrative area. In this case we will choose Nakuru (as we are interested in Lake Nakuru).</p>
+<pre class="r"><code>library(geonames)
+options(geonamesUsername=&quot;yourid&quot;)
+GN_nakuru &lt;- GNchildren(7668902)
+save(GN_nakuru, file = &quot;GN_nakuru.rda&quot;)</code></pre>
+<pre class="r"><code>head(GN_nakuru)</code></pre>
+<pre><code>##   adminCode1      lng geonameId       toponymName countryId fcl population
+## 1         39 35.98333    200792           Athinai    192950   P          0
+## 2         39 36.11667    200707 Bahati Settlement    192950   P          0
+## 3         39  36.3491    199246         Cokereria    192950   P          0
+## 4         39 35.68333    199083   Darasha ya Mawe    192950   P          0
+## 5         39    36.05    199067       Dawsonville    192950   P          0
+## 6         39 35.93004   8605137           Egerton    192950   P          0
+##   countryCode              name           fclName countryName
+## 1          KE           Athinai city, village,...       Kenya
+## 2          KE Bahati Settlement city, village,...       Kenya
+## 3          KE         Cokereria city, village,...       Kenya
+## 4          KE   Darasha ya Mawe city, village,...       Kenya
+## 5          KE       Dawsonville city, village,...       Kenya
+## 6          KE           Egerton city, village,...       Kenya
+##         fcodeName adminName1      lat fcode
+## 1 populated place     Nakuru -0.06667   PPL
+## 2 populated place     Nakuru    -0.15   PPL
+## 3 populated place     Nakuru  -0.4346   PPL
+## 4 populated place     Nakuru -0.43333   PPL
+## 5 populated place     Nakuru -0.28333   PPL
+## 6 populated place     Nakuru -0.36667   PPL</code></pre>
+<p>As an alternative we can also simply search for a name we are interested in:</p>
+<pre class="r"><code>library(geonames)
+options(geonamesUsername=&quot;yourid&quot;)
+GN_lake_nakuru_s &lt;- GNsearch(q=&quot;Lake Nakuru&quot;)</code></pre>
+<pre class="r"><code>load(&quot;GN_lake_nakuru_s.rda&quot;)</code></pre>
+<pre class="r"><code>head(GN_lake_nakuru_s)</code></pre>
+<pre><code>##   adminCode1      lng geonameId               toponymName countryId fcl
+## 1         39 36.09297    184621               Lake Nakuru    192950   H
+## 2         39 36.09982    189775 Lake Nakuru National Park    192950   L
+## 3         39 36.24272    198571           Lake Elmenteita    192950   H
+## 4         39 36.35975    184706             Lake Naivasha    192950   H
+## 5         39 36.26233    199238               Crater Lake    192950   H
+## 6         39 36.08333    189773          Lake View Estate    192950   P
+##   population countryCode                      name           fclName
+## 1          0          KE               Lake Nakuru stream, lake, ...
+## 2          0          KE Lake Nakuru National Park   parks,area, ...
+## 3          0          KE           Lake Elmenteita stream, lake, ...
+## 4          0          KE             Lake Naivasha stream, lake, ...
+## 5          0          KE               Crater Lake stream, lake, ...
+## 6          0          KE          Lake View Estate city, village,...
+##   countryName                  fcodeName adminName1      lat fcode
+## 1       Kenya                       lake     Nakuru -0.35703    LK
+## 2       Kenya                       park     Nakuru -0.33947   PRK
+## 3       Kenya                       lake     Nakuru -0.44015    LK
+## 4       Kenya                       lake     Nakuru -0.76732    LK
+## 5       Kenya                       lake     Nakuru  -0.7829    LK
+## 6       Kenya section of populated place     Nakuru     -0.3  PPLX</code></pre>
+<p>The main limiting issue with the API is that the focus is on administrative units and population centres with features (such as lakes, mountains etc.) only available at present through the search facility.</p>
+<p>So, the API will mainly be useful to us for initial look up of information, and administrative and population information. It can also be used for reverse geocoding but we will not cover that here. For our purposes the most important resource is the data dump.</p>
+</div>
+<div id="working-with-files-from-the-geonames-data-dump" class="section level3">
+<h3>Working with files from the geonames data dump</h3>
+<p>We will be working with the data for Kenya that is available from the data dump <a href="http://download.geonames.org/export/dump/KE.zip">here</a></p>
+<p>When we unzip the file it contains two files:</p>
+<ol style="list-style-type: lower-alpha">
+<li>the place names, features and coordinate data</li>
+<li>A text file containing the details and the column names.</li>
+</ol>
+<p>Note that the actual data file does not contain the column names. You will find them listed in the readme.txt</p>
+<div class="figure">
+<img src="images/geonames/readme.txt_2017-0128_09-53-36.png" />
+
+</div>
+<p>We can import the data directly from the website using a slightly involved route as follows by creating a temporary directory as a holder, then downloading and unzipping and finally importing the KE.txt file with <code>readr::read_tsv()</code>. It is important to set column names to false with col_names = FALSE. If using this route you will need to know the country code for the .txt file to unzip.</p>
+<pre class="r"><code>library(readr)
+temp &lt;- tempfile()
+download.file(&quot;http://download.geonames.org/export/dump/KE.zip&quot;, temp)
+KE &lt;- unz(temp, &quot;KE.txt&quot;)
+kenya_geodump &lt;- read_tsv(KE, col_names = FALSE)</code></pre>
+<p>We can also import a manually downloaded file into RStudio using <code>File &gt; Import Dataset &gt; From CSV</code> setting the Delimiter to Tab and unchecking First Row as Names.</p>
+<p>We can add the column names using the small geonames_fields function below.</p>
+<pre class="r"><code>geonames_fields &lt;- function(df){
+  library(dplyr)
+  df &lt;- dplyr::rename_(df, &quot;geonameid&quot; = &quot;X1&quot;, &quot;name&quot; = &quot;X2&quot;, &quot;asciiname&quot; = &quot;X3&quot;, &quot;alternatenames&quot; = &quot;X4&quot;, &quot;latitude&quot; = &quot;X5&quot;, &quot;longitude&quot; = &quot;X6&quot;, &quot;feature_class&quot; = &quot;X7&quot;, &quot;feature_code&quot; = &quot;X8&quot;, &quot;country_code&quot; = &quot;X9&quot;, &quot;cc2&quot; = &quot;X10&quot;, &quot;admin1_code&quot; = &quot;X11&quot;, &quot;admin2_code&quot; = &quot;X12&quot;, &quot;admin3_code&quot; = &quot;X13&quot;, &quot;admin4_code&quot; = &quot;X14&quot;, &quot;population&quot; = &quot;X15&quot;, &quot;elevation&quot; = &quot;X16&quot;, &quot;dem&quot; = &quot;X17&quot;, &quot;timezone&quot; = &quot;X18&quot;, &quot;modification_date&quot; = &quot;X19&quot;)
+}</code></pre>
+<pre class="r"><code>kenya_geodump &lt;- geonames_fields(kenya_geodump)
+head(kenya_geodump)</code></pre>
+<pre><code>## # A tibble: 6 × 19
+##   geonameid      name asciiname
+##       &lt;int&gt;     &lt;chr&gt;     &lt;chr&gt;
+## 1     54121 Mata Arba Mata Arba
+## 2     55628  Kolbiyow  Kolbiyow
+## 3     58869 Bur Gause Bur Gause
+## 4     60856 Did Songa Did Songa
+## 5    149213      Umba      Umba
+## 6    154205   Mchongo   Mchongo
+## # ... with 16 more variables: alternatenames &lt;chr&gt;, latitude &lt;dbl&gt;,
+## #   longitude &lt;dbl&gt;, feature_class &lt;chr&gt;, feature_code &lt;chr&gt;,
+## #   country_code &lt;chr&gt;, cc2 &lt;chr&gt;, admin1_code &lt;chr&gt;, admin2_code &lt;chr&gt;,
+## #   admin3_code &lt;chr&gt;, admin4_code &lt;chr&gt;, population &lt;int&gt;,
+## #   elevation &lt;int&gt;, dem &lt;int&gt;, timezone &lt;chr&gt;, modification_date &lt;date&gt;</code></pre>
+<p>We now have a list of names and IDs for Kenya.</p>
+<pre class="r"><code>head(kenya_geodump) %&gt;% print()</code></pre>
+<pre><code>## # A tibble: 6 × 19
+##   geonameid      name asciiname
+##       &lt;int&gt;     &lt;chr&gt;     &lt;chr&gt;
+## 1     54121 Mata Arba Mata Arba
+## 2     55628  Kolbiyow  Kolbiyow
+## 3     58869 Bur Gause Bur Gause
+## 4     60856 Did Songa Did Songa
+## 5    149213      Umba      Umba
+## 6    154205   Mchongo   Mchongo
+## # ... with 16 more variables: alternatenames &lt;chr&gt;, latitude &lt;dbl&gt;,
+## #   longitude &lt;dbl&gt;, feature_class &lt;chr&gt;, feature_code &lt;chr&gt;,
+## #   country_code &lt;chr&gt;, cc2 &lt;chr&gt;, admin1_code &lt;chr&gt;, admin2_code &lt;chr&gt;,
+## #   admin3_code &lt;chr&gt;, admin4_code &lt;chr&gt;, population &lt;int&gt;,
+## #   elevation &lt;int&gt;, dem &lt;int&gt;, timezone &lt;chr&gt;, modification_date &lt;date&gt;</code></pre>
+<p>Geonames uses a range of codes called <a href="http://www.geonames.org/export/codes.html">feature codes</a> that can be downloaded from here <a href="http://download.geonames.org/export/dump/featureCodes_en.txt" class="uri">http://download.geonames.org/export/dump/featureCodes_en.txt</a>. We can read the file into R directly and provide the relevant column names. For reference the file can be found in data with this rproject on github <a href="">link here</a>.</p>
+<pre class="r"><code>library(readr)
+library(tidyr)
+geonames_features &lt;-  readr::read_tsv(&quot;http://download.geonames.org/export/dump/featureCodes_en.txt&quot;, col_names = FALSE) %&gt;% dplyr::rename(&quot;feature_code&quot; = X1, &quot;description&quot; = X2, &quot;detail&quot; = X3)</code></pre>
+<pre><code>## Parsed with column specification:
+## cols(
+##   X1 = col_character(),
+##   X2 = col_character(),
+##   X3 = col_character()
+## )</code></pre>
+<pre class="r"><code>geonames_features</code></pre>
+<pre><code>## # A tibble: 671 × 3
+##    feature_code                                     description
+##           &lt;chr&gt;                                           &lt;chr&gt;
+## 1        A.ADM1             first-order administrative division
+## 2       A.ADM1H  historical first-order administrative division
+## 3        A.ADM2            second-order administrative division
+## 4       A.ADM2H historical second-order administrative division
+## 5        A.ADM3             third-order administrative division
+## 6       A.ADM3H  historical third-order administrative division
+## 7        A.ADM4            fourth-order administrative division
+## 8       A.ADM4H historical fourth-order administrative division
+## 9        A.ADM5             fifth-order administrative division
+## 10      A.ADM5H  historical fifth-order administrative division
+## # ... with 661 more rows, and 1 more variables: detail &lt;chr&gt;</code></pre>
+<p>Let’s take a look.</p>
+<pre class="r"><code>head(geonames_features)</code></pre>
+<pre><code>## # A tibble: 6 × 3
+##   feature_code                                     description
+##          &lt;chr&gt;                                           &lt;chr&gt;
+## 1       A.ADM1             first-order administrative division
+## 2      A.ADM1H  historical first-order administrative division
+## 3       A.ADM2            second-order administrative division
+## 4      A.ADM2H historical second-order administrative division
+## 5       A.ADM3             third-order administrative division
+## 6      A.ADM3H  historical third-order administrative division
+## # ... with 1 more variables: detail &lt;chr&gt;</code></pre>
+<p>The codes are presented as A.ADM1 for <code>first-order administrative division</code> and so on. We would like to break this up a bit to make it easier to filter for our subjects of interest. At this stage we don’t know if we will need the original combined codes and so when separating the columns we will use <code>remove=FALSE</code>. tidyr’s <code>separate()</code> function will helpfully guess the rest for us.</p>
+<pre class="r"><code>library(tidyr)
+geonames_features &lt;- tidyr::separate(geonames_features, feature_code, c(&quot;feature_class&quot;, &quot;feature_subclass&quot;), remove = FALSE, fill = &quot;right&quot;)
+geonames_features</code></pre>
+<pre><code>## # A tibble: 671 × 5
+##    feature_code feature_class feature_subclass
+## *         &lt;chr&gt;         &lt;chr&gt;            &lt;chr&gt;
+## 1        A.ADM1             A             ADM1
+## 2       A.ADM1H             A            ADM1H
+## 3        A.ADM2             A             ADM2
+## 4       A.ADM2H             A            ADM2H
+## 5        A.ADM3             A             ADM3
+## 6       A.ADM3H             A            ADM3H
+## 7        A.ADM4             A             ADM4
+## 8       A.ADM4H             A            ADM4H
+## 9        A.ADM5             A             ADM5
+## 10      A.ADM5H             A            ADM5H
+## # ... with 661 more rows, and 2 more variables: description &lt;chr&gt;,
+## #   detail &lt;chr&gt;</code></pre>
+<p>We have one empty row at the end of the dataset that throws a warning. This proves to be a double bar for not available in the original file that is converted to null.</p>
+</div>
+<div id="filtering-to-identifying-lakes-and-water-features" class="section level3">
+<h3>Filtering to identifying Lakes and Water Features</h3>
+<p>We are interested in exploring the data on lakes and water features in Kenya. These can be found in feature_class H. We can easily filter our dataset as follows</p>
+<pre class="r"><code>kenya_geonames_water &lt;- dplyr::filter(geonames_features, feature_class == &quot;H&quot;)
+kenya_geonames_water</code></pre>
+<pre><code>## # A tibble: 137 × 5
+##    feature_code feature_class feature_subclass           description
+##           &lt;chr&gt;         &lt;chr&gt;            &lt;chr&gt;                 &lt;chr&gt;
+## 1        H.AIRS             H             AIRS seaplane landing area
+## 2        H.ANCH             H             ANCH             anchorage
+## 3         H.BAY             H              BAY                   bay
+## 4        H.BAYS             H             BAYS                  bays
+## 5        H.BGHT             H             BGHT              bight(s)
+## 6         H.BNK             H              BNK               bank(s)
+## 7        H.BNKR             H             BNKR           stream bank
+## 8        H.BNKX             H             BNKX       section of bank
+## 9         H.BOG             H              BOG                bog(s)
+## 10       H.CAPG             H             CAPG                icecap
+## # ... with 127 more rows, and 1 more variables: detail &lt;chr&gt;</code></pre>
+<p>Within feature_class H the feature codes that relate to Lakes are listed under L in the feature_code and under L in the feature_subclass.</p>
+<p>If we take a look at the new water features table then we will see that there are quite a number of codes. Which codes we will want will depend on our purposes.</p>
+<pre class="r"><code>library(dplyr)
+dplyr::select(kenya_geonames_water, 1,3,4)</code></pre>
+<pre><code>## # A tibble: 137 × 3
+##    feature_code feature_subclass           description
+##           &lt;chr&gt;            &lt;chr&gt;                 &lt;chr&gt;
+## 1        H.AIRS             AIRS seaplane landing area
+## 2        H.ANCH             ANCH             anchorage
+## 3         H.BAY              BAY                   bay
+## 4        H.BAYS             BAYS                  bays
+## 5        H.BGHT             BGHT              bight(s)
+## 6         H.BNK              BNK               bank(s)
+## 7        H.BNKR             BNKR           stream bank
+## 8        H.BNKX             BNKX       section of bank
+## 9         H.BOG              BOG                bog(s)
+## 10       H.CAPG             CAPG                icecap
+## # ... with 127 more rows</code></pre>
+<p>Having reviewed the codes we now need to decide how to filter the actual geonames table. We will start by filtering on the main code H. We are interested in lakes so lets try using the identifier for lakes. In practice we may need more than one code.</p>
+<pre class="r"><code>library(dplyr)
+kenya_geodump %&gt;% dplyr::filter(., feature_class == &quot;H&quot;) %&gt;% 
+  filter(., grepl(&#39;^L&#39;, feature_code)) -&gt; kenya_lakes # output
+kenya_lakes</code></pre>
+<pre><code>## # A tibble: 89 × 19
+##    geonameid            name       asciiname
+##        &lt;int&gt;           &lt;chr&gt;           &lt;chr&gt;
+## 1     161340   Lake Amboseli   Lake Amboseli
+## 2     178141      West Scarp      West Scarp
+## 3     178374     Lake Wamoro     Lake Wamoro
+## 4     178403 Bandari ya Wali Bandari ya Wali
+## 5     178699     Lake Uranga     Lake Uranga
+## 6     178846    Tyndall Tarn    Tyndall Tarn
+## 7     179212           Tilam           Tilam
+## 8     179287  Thompson Tarns  Thompson Tarns
+## 9     179492   Lake Telelana   Lake Telelana
+## 10    179494     Teleki Tarn     Teleki Tarn
+## # ... with 79 more rows, and 16 more variables: alternatenames &lt;chr&gt;,
+## #   latitude &lt;dbl&gt;, longitude &lt;dbl&gt;, feature_class &lt;chr&gt;,
+## #   feature_code &lt;chr&gt;, country_code &lt;chr&gt;, cc2 &lt;chr&gt;, admin1_code &lt;chr&gt;,
+## #   admin2_code &lt;chr&gt;, admin3_code &lt;chr&gt;, admin4_code &lt;chr&gt;,
+## #   population &lt;int&gt;, elevation &lt;int&gt;, dem &lt;int&gt;, timezone &lt;chr&gt;,
+## #   modification_date &lt;date&gt;</code></pre>
+<p>Ok, we now have a table with 89 names. We could go further and include the alternate names column or we could extend the filters to mangroves or other features. In the original table we also find a code for Parks and so we could also include Lake Nakuru National Park, Lake Bogoria National Reserve and others. To capture those we would simply look for the term Lake in the name or asciiname or alternate name. A simple example searching the asciiname would be to look for the work Lake using <code>stringr</code>. This will return a logical TRUE/FALSE that we can add to assist with filtering the dataset.</p>
+<pre class="r"><code>library(dplyr)
+library(stringr)
+kenya_geodump$lake &lt;- stringr::str_detect(kenya_geodump$asciiname, &quot;Lake&quot;) %&gt;% 
+  as.character()</code></pre>
+<p>Note that without the addition of <code>as.character() the column that we added will be of type boolean and won't be available to filter with</code>dplyr::filter()`.</p>
+<p>Let’s take a look. We now have a logical TRUE false column on the word Lake.</p>
+<pre class="r"><code>library(dplyr)
+dplyr::select(kenya_geodump,1:3, 20) %&gt;% head()</code></pre>
+<pre><code>## # A tibble: 6 × 4
+##   geonameid      name asciiname  lake
+##       &lt;int&gt;     &lt;chr&gt;     &lt;chr&gt; &lt;chr&gt;
+## 1     54121 Mata Arba Mata Arba FALSE
+## 2     55628  Kolbiyow  Kolbiyow FALSE
+## 3     58869 Bur Gause Bur Gause FALSE
+## 4     60856 Did Songa Did Songa FALSE
+## 5    149213      Umba      Umba FALSE
+## 6    154205   Mchongo   Mchongo FALSE</code></pre>
+<p>Now we can filter that to retain the references to Lake.</p>
+<pre class="r"><code>library(dplyr)
+KE_geodump_lakes &lt;- dplyr::filter(kenya_geodump, lake == &quot;TRUE&quot;)</code></pre>
+<pre class="r"><code>head(KE_geodump_lakes)</code></pre>
+<pre><code>## # A tibble: 6 × 20
+##   geonameid          name     asciiname
+##       &lt;int&gt;         &lt;chr&gt;         &lt;chr&gt;
+## 1    161340 Lake Amboseli Lake Amboseli
+## 2    178374   Lake Wamoro   Lake Wamoro
+## 3    178699   Lake Uranga   Lake Uranga
+## 4    179492 Lake Telelana Lake Telelana
+## 5    179817 Lake Stefanie Lake Stefanie
+## 6    179974    Lake Solai    Lake Solai
+## # ... with 17 more variables: alternatenames &lt;chr&gt;, latitude &lt;dbl&gt;,
+## #   longitude &lt;dbl&gt;, feature_class &lt;chr&gt;, feature_code &lt;chr&gt;,
+## #   country_code &lt;chr&gt;, cc2 &lt;chr&gt;, admin1_code &lt;chr&gt;, admin2_code &lt;chr&gt;,
+## #   admin3_code &lt;chr&gt;, admin4_code &lt;chr&gt;, population &lt;int&gt;,
+## #   elevation &lt;int&gt;, dem &lt;int&gt;, timezone &lt;chr&gt;, modification_date &lt;date&gt;,
+## #   lake &lt;chr&gt;</code></pre>
+<p>Note here that this returns a lower number than the use of the codes above because not all lakes include the word Lake in their name. However, it will capture parks that include the name but also additional features that we may not want such as Lake Rudolf Airport. So, for our present purposes we will drop this.</p>
+<p>As this makes clear, additional refinements many be needed when working with the table to select precisely those features that you want.</p>
+</div>
+<div id="look-up-the-lake-names-in-patents" class="section level3">
+<h3>Look up the Lake names in Patents</h3>
+<p>We can use the <code>lensr</code> package (presently only on Github), to generate counts of the number of patent documents for each of our search terms. We will use the kenya_lakes table with 89 entries for this test. To avoid putting pressure on the server we will leave the timer = to the default of 20.</p>
+<p>To get started we need to install the <code>lensr</code> package.</p>
+<pre class="r"><code>devtools::install_github(&quot;poldham/lensr&quot;)</code></pre>
+<pre class="r"><code>library(lensr)</code></pre>
+<p>We will use the <code>lens_count()</code> function to generate a set of urls to search the lens and retrieve the counts for our 89 terms. It should take about 25 minutes to run. <code>lensr</code> count will search 95 patent jurisdictions worldwide by default. However, some patent documents, notably machine read documents from Australia, can create significant noise. To limit the search to the main jurisdictions (US, EP, JP and WO) the argument <code>jurisdiction = &quot;main&quot;</code> can be added (see the <code>lensr</code> package documentation).</p>
+<p>Note also that by default the Lens uses stemming rather than an exact match. So for example Carr Lakes will also capture <code>Carr, Lake</code> where the Carr is an inventor surname and the Lake is part of a place name (Lake Jackson in Texas). Stemming is disabled by default in <code>lensr</code> to limit what you get to what you ask for.</p>
+<p>Note that a limitation of the existing code is that we cannot use a combination of terms such as “kenya” AND “lake naivasha”. This will be addressed in a future update of <code>lensr</code></p>
+<p>The first thing you will see when you run the code below is a set of urls being generated. Then those URLs will be sent to the Lens to retrieve the counts every 20 seconds. You may want to go and have a cup of tea.</p>
+<pre class="r"><code>library(lensr)
+kenya_lakes_pat_raw &lt;- lensr::lens_count(kenya_lakes$asciiname, jurisdiction = &quot;main&quot;)
+save(kenya_lakes_pat_raw, file = &quot;kenya_lakes_pat_raw.rda&quot;)</code></pre>
+<pre class="r"><code>load(&quot;kenya_lakes_pat_raw.rda&quot;)
+kenya_lakes_patents &lt;- kenya_lakes_pat_raw
+head(kenya_lakes_patents, 20)</code></pre>
+<pre><code>## # A tibble: 20 × 3
+##    publications families                   search
+##           &lt;dbl&gt;    &lt;dbl&gt;                    &lt;chr&gt;
+## 1             0        0        &quot;&quot;Lake Amboseli&quot;&quot;
+## 2             0        0           &quot;&quot;West Scarp&quot;&quot;
+## 3             0        0          &quot;&quot;Lake Wamoro&quot;&quot;
+## 4             0        0      &quot;&quot;Bandari ya Wali&quot;&quot;
+## 5             0        0          &quot;&quot;Lake Uranga&quot;&quot;
+## 6             0        0         &quot;&quot;Tyndall Tarn&quot;&quot;
+## 7             9        7                &quot;&quot;Tilam&quot;&quot;
+## 8             0        0       &quot;&quot;Thompson Tarns&quot;&quot;
+## 9             0        0        &quot;&quot;Lake Telelana&quot;&quot;
+## 10            0        0          &quot;&quot;Teleki Tarn&quot;&quot;
+## 11            0        0        &quot;&quot;Lake Stefanie&quot;&quot;
+## 12            0        0          &quot;&quot;Square Tarn&quot;&quot;
+## 13            0        0 &quot;&quot;South-Western Lagoon&quot;&quot;
+## 14            0        0           &quot;&quot;Lake Solai&quot;&quot;
+## 15            0        0         &quot;&quot;Sokorte Guda&quot;&quot;
+## 16            3        2           &quot;&quot;Simbi Lake&quot;&quot;
+## 17            0        0           &quot;&quot;Simba Taru&quot;&quot;
+## 18            0        0           &quot;&quot;Simba Tarn&quot;&quot;
+## 19            0        0     &quot;&quot;Ziwa la Minkirio&quot;&quot;
+## 20            0        0      &quot;&quot;Lake Shaka Babo&quot;&quot;</code></pre>
+<p>Where there are a small number of results you will see a message that the number of publications is being copied into the families column. This is because the Lens database normally returns both publications and families. However, where the numbers are low it will only return a field called results (the equivalent of patent families).</p>
+<p>For specific geographic place names such as <code>Tyndall Tarn</code> we would not expect to see many results. For other names (such as Crater Lake) that may be common across a number of countries expect to see a significant number of false positives. As such, the queries should be seen as the starting point for an enquiry rather than as the final end result.</p>
+</div>
+<div id="adding-urls-to-the-table-for-mapping" class="section level3">
+<h3>Adding urls to the table for mapping</h3>
+<p>When the query has finished running we will want to add some URLs to that table so that we know where they came from and to use in mapping. We can do that as follows using the <code>lens_urls</code> function that powers <code>lens_count</code> used above.</p>
+<pre class="r"><code>library(lensr)
+kenya_lakes_patents$url &lt;- lensr::lens_urls(kenya_lakes$asciiname, jurisdiction = &quot;main&quot;)
+head(kenya_lakes_patents)</code></pre>
+<pre><code>## # A tibble: 6 × 4
+##   publications families              search
+##          &lt;dbl&gt;    &lt;dbl&gt;               &lt;chr&gt;
+## 1            0        0   &quot;&quot;Lake Amboseli&quot;&quot;
+## 2            0        0      &quot;&quot;West Scarp&quot;&quot;
+## 3            0        0     &quot;&quot;Lake Wamoro&quot;&quot;
+## 4            0        0 &quot;&quot;Bandari ya Wali&quot;&quot;
+## 5            0        0     &quot;&quot;Lake Uranga&quot;&quot;
+## 6            0        0    &quot;&quot;Tyndall Tarn&quot;&quot;
+## # ... with 1 more variables: url &lt;chr&gt;</code></pre>
+</div>
+<div id="tidy-the-names-for-matching-to-geonames" class="section level3">
+<h3>Tidy the names for matching to geonames</h3>
+<p>Next, we will tidy up by removing the double quotes around the lake names (with thanks to <a href="http://stackoverflow.com/questions/31257671/how-to-find-and-replace-double-quotes-in-r-data-frame">Claus Wilke</a>. This will allow us to match the names when mapping below.</p>
+<pre class="r"><code>library(dplyr)
+library(stringr)
+kenya_lakes_patents %&gt;% mutate_each(funs(str_replace_all(., &quot;\&quot;&quot;, &quot;&quot;))) -&gt; kenya_lakes_patents # output df</code></pre>
+<pre class="r"><code>head(kenya_lakes_patents)</code></pre>
+<pre><code>## # A tibble: 6 × 4
+##   publications families          search
+##          &lt;chr&gt;    &lt;chr&gt;           &lt;chr&gt;
+## 1            0        0   Lake Amboseli
+## 2            0        0      West Scarp
+## 3            0        0     Lake Wamoro
+## 4            0        0 Bandari ya Wali
+## 5            0        0     Lake Uranga
+## 6            0        0    Tyndall Tarn
+## # ... with 1 more variables: url &lt;chr&gt;</code></pre>
+<p>We will want to filter out the results that are either zero or where the patent results are large. Note here that the nature of the searches is such that there may be significant false positives that will require careful manual review.</p>
+<p>By default <code>lensr</code> returns numbers as character fields. We will need to convert them to numeric.</p>
+<pre class="r"><code>kenya_lakes_patents$publications &lt;- as.numeric(kenya_lakes_patents$publications)
+kenya_lakes_patents$families &lt;- as.numeric(kenya_lakes_patents$families)</code></pre>
+<p>To visualize the data we will want to take out the noisy result for North West in the data. There are a number of ways to do this including looking up the row numbers and excluding them. Here is one using filter and <code>!=</code> for is not.</p>
+<pre class="r"><code>kenya_lakes_patents %&gt;% dplyr::filter(search != &quot;North West&quot;) -&gt; kenya_lakes_patents # output df</code></pre>
+<p>Note that Crater Lake and Blue Lagoon are also particularly likely to return false positive results… but for the moment we will live with that.</p>
+<p>Next, let’s generates a quick summary of the data.</p>
+<pre class="r"><code>library(dplyr)
+library(ggplot2)
+library(plotly)
+kenya_lakes_patents %&gt;% dplyr::filter(families &gt; 0) %&gt;% 
+  ggplot2::ggplot(aes(x = search, y = families, fill = search)) +
+  geom_bar(stat = &quot;identity&quot;, show.legend = FALSE) +
+  coord_flip()</code></pre>
+<p><img src="geonames_files/figure-html/ggplot_summary-1.png" width="672" /></p>
+<p>The results for Crater Lake and Blue Lagoon clearly require further investigation and could be dropped at this stage.</p>
+<p>For example, Crater Lake generates 86 patent families. However, an additional search for references to both Kenya and Crater Lake reveals only 11 families and 31 publications. A review of these documents reveals that only 9 families contain explicit reference to collection in Kenya and two are passing references. Those documents can be viewed in a <a href="https://www.lens.org/lens/collection/14539">collection</a>.</p>
+<p>While we will proceed with mapping, we need to bear in mind that the results are to be used for exploratory purposes and are not definitive.</p>
+</div>
+</div>
+<div id="mapping-the-results" class="section level2">
+<h2>Mapping the results</h2>
+<p>We now have some counts of the number of patent documents associated with a Lake in Kenya.</p>
+<p>One of the advantages of using geonames is that the table contains the latitude and longitude for the location. Bear in mind that for large features we would probably prefer to use shape files. But, for the moment, we will simply see what we learn from mapping to the geonames coordinates for the features.</p>
+<p>The first step is to ensure that there is a shared name between the two tables and then join them together.</p>
+<p>If we view the names of the two tables we need <code>kenya_lakes</code> and <code>lakes_patents</code> we will see that there is no shared value to join the table on. We will solve this by renaming <code>search</code> in the patents table as name (the equivalent in the parent <code>kenya_lakes</code>).</p>
+<pre class="r"><code>library(dplyr)
+kenya_lakes_patents$name &lt;- kenya_lakes_patents$search</code></pre>
+<p>Next we join the two tables:</p>
+<pre class="r"><code>map_lakes_patents &lt;- left_join(kenya_lakes, kenya_lakes_patents) </code></pre>
+<pre><code>## Joining, by = &quot;name&quot;</code></pre>
+<p>If we inspect map_lakes_patents we will see that we have NA and zero results for some of our patent data in the families field. If we maintain these locations in the dataset then they will appear on our map, which will result in confusion. So, we need to filter them out. Bear in mind that where we are using the scientific literature as well that we may want to keep these records.</p>
+<pre class="r"><code>map_lakes_patents &lt;- filter(map_lakes_patents, families &gt;= 1) %&gt;% 
+  drop_na(families)</code></pre>
+<p>That reduces our set to those that contain some results.</p>
+<p>We now have a table that include the data from geonames with the coordinates and the counts from the patent data. We are now in a position to map them using the leaflet package as we did for the GBIF data earlier.</p>
+<p>Note that the numbers that will appear on the map refer to the number of locations, not the number of patent documents.</p>
+<pre class="r"><code>library(leaflet)
+lakes_data &lt;- leaflet(map_lakes_patents) %&gt;%
+  addTiles() %&gt;%  
+  addCircleMarkers(~longitude, ~latitude, popup = map_lakes_patents$name, radius = 1, fillOpacity = 0.5, clusterOptions = markerClusterOptions())
+lakes_data</code></pre>
+<div id="htmlwidget-c9f9fb3d883474881c5b" style="width:672px;height:480px;" class="leaflet html-widget"></div>
+<script type="application/json" data-for="htmlwidget-c9f9fb3d883474881c5b">{"x":{"options":{"crs":{"crsClass":"L.CRS.EPSG3857","code":null,"proj4def":null,"projectedBounds":null,"options":{}}},"calls":[{"method":"addTiles","args":["//{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",null,null,{"minZoom":0,"maxZoom":18,"maxNativeZoom":null,"tileSize":256,"subdomains":"abc","errorTileUrl":"","tms":false,"continuousWorld":false,"noWrap":false,"zoomOffset":0,"zoomReverse":false,"opacity":1,"zIndex":null,"unloadInvisibleTiles":null,"updateWhenIdle":null,"detectRetina":false,"reuseTiles":false,"attribution":"&copy; <a href=\"http://openstreetmap.org\">OpenStreetMap\u003c/a> contributors, <a href=\"http://creativecommons.org/licenses/by-sa/2.0/\">CC-BY-SA\u003c/a>"}]},{"method":"addCircleMarkers","args":[[0.84633,-0.36845,0.6255,0.04768,3.5,-1.75517,-0.35703,-0.76732,-1.86667,0.26667,-2.10682,0.55502,-1.16667,-0.44015,-0.15,-0.7829,0.25886,-3.35,-0.07526,-2.59901],[36.12145,34.63003,40.31928,37.52809,36,36.27615,36.09297,36.35975,36.28333,36,36.40455,40.43233,37.33333,36.24272,37.31667,36.26233,36.10178,40.01667,37.46533,40.33862],1,null,null,{"lineCap":null,"lineJoin":null,"clickable":true,"pointerEvents":null,"className":"","stroke":true,"color":"#03F","weight":5,"opacity":0.5,"fill":true,"fillColor":"#03F","fillOpacity":0.5,"dashArray":null},{"showCoverageOnHover":true,"zoomToBoundsOnClick":true,"spiderfyOnMaxZoom":true,"removeOutsideVisibleBounds":true,"spiderLegPolylineOptions":{"weight":1.5,"color":"#222","opacity":0.5},"freezeAtZoom":false},null,["Tilam","Simbi Lake","Sariba","Sacred Lake","Lake Turkana","Nasikie Engida","Lake Nakuru","Lake Naivasha","Lake Magadi","Kamarr","Kabongo","Halati","Enchanted Lake","Lake Elmenteita","Curling Pond","Crater Lake","Lake Bogoria","Blue Lagoon","Lake Alice","Tana River"],null,null,null,null]}],"limits":{"lat":[-3.35,3.5],"lng":[34.63003,40.43233]}},"evals":[],"jsHooks":[]}</script>
+<p>This gives us a map of the different locations with an associated patent document (bearing in mind that the patent data may need further refinement for false positives). The question now becomes making the links interactive. We can do this by hyperlinking the names of the places with the data in the Lens database.</p>
+<div id="linking-map-labels-to-data" class="section level3">
+<h3>Linking Map Labels to Data</h3>
+<p>To add hyperlinks to the map we need a label and the hyperlink in a particular format. It should look something like this and associates a URL with a label</p>
+<pre class="r"><code>#&lt;a href=&quot;http://www.gbif.org/occurrence/436684107&quot;&gt;&quot;Tamarix africana&quot;&lt;/a&gt;&lt;/b&gt;</code></pre>
+<p>We need a small function to add the necessary code to our reference data set in map_lakes_patents. This rough and ready function simply pastes the html code in the right place with the Lens url and the name of the lake. The <code>htmltools</code> package may provide a neater approach.</p>
+<pre class="r"><code>label_map &lt;- function(url_id = &quot;NULL&quot;, label = &quot;NULL&quot;){
+  b &lt;- &quot;&lt;b&gt;&quot;
+  href &lt;- &quot;&lt;a href=&quot;
+  close_href &lt;- &quot;&gt;&quot;
+  closea &lt;- &quot;&lt;/a&gt;&quot;
+  closeb &lt;- &quot;&lt;/b&gt;&quot;
+  out &lt;- paste0(b, href, url_id, close_href, label, closea, closeb)
+}</code></pre>
+<p>We now use the function to create a new field with the map labels hyperlinked to the patent database.</p>
+<pre class="r"><code>map_lakes_patents$map_labels &lt;- label_map(url_id = map_lakes_patents$url, label = map_lakes_patents$asciiname)</code></pre>
+<p>Now we use the map_labels field in creating the map.</p>
+<pre class="r"><code>library(leaflet)
+lakes_data &lt;- leaflet(map_lakes_patents) %&gt;%
+  addTiles() %&gt;%  
+  addCircleMarkers(~longitude, ~latitude, popup = map_lakes_patents$map_labels, radius = 1, fillOpacity = 0.5, clusterOptions = markerClusterOptions())
+lakes_data</code></pre>
+<div id="htmlwidget-4e89085b4e0603170c0a" style="width:672px;height:480px;" class="leaflet html-widget"></div>
+<script type="application/json" data-for="htmlwidget-4e89085b4e0603170c0a">{"x":{"options":{"crs":{"crsClass":"L.CRS.EPSG3857","code":null,"proj4def":null,"projectedBounds":null,"options":{}}},"calls":[{"method":"addTiles","args":["//{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",null,null,{"minZoom":0,"maxZoom":18,"maxNativeZoom":null,"tileSize":256,"subdomains":"abc","errorTileUrl":"","tms":false,"continuousWorld":false,"noWrap":false,"zoomOffset":0,"zoomReverse":false,"opacity":1,"zIndex":null,"unloadInvisibleTiles":null,"updateWhenIdle":null,"detectRetina":false,"reuseTiles":false,"attribution":"&copy; <a href=\"http://openstreetmap.org\">OpenStreetMap\u003c/a> contributors, <a href=\"http://creativecommons.org/licenses/by-sa/2.0/\">CC-BY-SA\u003c/a>"}]},{"method":"addCircleMarkers","args":[[0.84633,-0.36845,0.6255,0.04768,3.5,-1.75517,-0.35703,-0.76732,-1.86667,0.26667,-2.10682,0.55502,-1.16667,-0.44015,-0.15,-0.7829,0.25886,-3.35,-0.07526,-2.59901],[36.12145,34.63003,40.31928,37.52809,36,36.27615,36.09297,36.35975,36.28333,36,36.40455,40.43233,37.33333,36.24272,37.31667,36.26233,36.10178,40.01667,37.46533,40.33862],1,null,null,{"lineCap":null,"lineJoin":null,"clickable":true,"pointerEvents":null,"className":"","stroke":true,"color":"#03F","weight":5,"opacity":0.5,"fill":true,"fillColor":"#03F","fillOpacity":0.5,"dashArray":null},{"showCoverageOnHover":true,"zoomToBoundsOnClick":true,"spiderfyOnMaxZoom":true,"removeOutsideVisibleBounds":true,"spiderLegPolylineOptions":{"weight":1.5,"color":"#222","opacity":0.5},"freezeAtZoom":false},null,["<b><a href=https://www.lens.org/lens/search?q=%22Tilam%22&jo=true&j=EP&j=JP&j=US&j=WO&st=false&n=50>Tilam\u003c/a>\u003c/b>","<b><a href=https://www.lens.org/lens/search?q=%22Simbi+Lake%22&jo=true&j=EP&j=JP&j=US&j=WO&st=false&n=50>Simbi Lake\u003c/a>\u003c/b>","<b><a href=https://www.lens.org/lens/search?q=%22Sariba%22&jo=true&j=EP&j=JP&j=US&j=WO&st=false&n=50>Sariba\u003c/a>\u003c/b>","<b><a href=https://www.lens.org/lens/search?q=%22Sacred+Lake%22&jo=true&j=EP&j=JP&j=US&j=WO&st=false&n=50>Sacred Lake\u003c/a>\u003c/b>","<b><a href=https://www.lens.org/lens/search?q=%22Lake+Turkana%22&jo=true&j=EP&j=JP&j=US&j=WO&st=false&n=50>Lake Turkana\u003c/a>\u003c/b>","<b><a href=https://www.lens.org/lens/search?q=%22Nasikie+Engida%22&jo=true&j=EP&j=JP&j=US&j=WO&st=false&n=50>Nasikie Engida\u003c/a>\u003c/b>","<b><a href=https://www.lens.org/lens/search?q=%22Lake+Nakuru%22&jo=true&j=EP&j=JP&j=US&j=WO&st=false&n=50>Lake Nakuru\u003c/a>\u003c/b>","<b><a href=https://www.lens.org/lens/search?q=%22Lake+Naivasha%22&jo=true&j=EP&j=JP&j=US&j=WO&st=false&n=50>Lake Naivasha\u003c/a>\u003c/b>","<b><a href=https://www.lens.org/lens/search?q=%22Lake+Magadi%22&jo=true&j=EP&j=JP&j=US&j=WO&st=false&n=50>Lake Magadi\u003c/a>\u003c/b>","<b><a href=https://www.lens.org/lens/search?q=%22Kamarr%22&jo=true&j=EP&j=JP&j=US&j=WO&st=false&n=50>Kamarr\u003c/a>\u003c/b>","<b><a href=https://www.lens.org/lens/search?q=%22Kabongo%22&jo=true&j=EP&j=JP&j=US&j=WO&st=false&n=50>Kabongo\u003c/a>\u003c/b>","<b><a href=https://www.lens.org/lens/search?q=%22Halati%22&jo=true&j=EP&j=JP&j=US&j=WO&st=false&n=50>Halati\u003c/a>\u003c/b>","<b><a href=https://www.lens.org/lens/search?q=%22Enchanted+Lake%22&jo=true&j=EP&j=JP&j=US&j=WO&st=false&n=50>Enchanted Lake\u003c/a>\u003c/b>","<b><a href=https://www.lens.org/lens/search?q=%22Lake+Elmenteita%22&jo=true&j=EP&j=JP&j=US&j=WO&st=false&n=50>Lake Elmenteita\u003c/a>\u003c/b>","<b><a href=https://www.lens.org/lens/search?q=%22Curling+Pond%22&jo=true&j=EP&j=JP&j=US&j=WO&st=false&n=50>Curling Pond\u003c/a>\u003c/b>","<b><a href=https://www.lens.org/lens/search?q=%22Crater+Lake%22&jo=true&j=EP&j=JP&j=US&j=WO&st=false&n=50>Crater Lake\u003c/a>\u003c/b>","<b><a href=https://www.lens.org/lens/search?q=%22Lake+Bogoria%22&jo=true&j=EP&j=JP&j=US&j=WO&st=false&n=50>Lake Bogoria\u003c/a>\u003c/b>","<b><a href=https://www.lens.org/lens/search?q=%22Blue+Lagoon%22&jo=true&j=EP&j=JP&j=US&j=WO&st=false&n=50>Blue Lagoon\u003c/a>\u003c/b>","<b><a href=https://www.lens.org/lens/search?q=%22Lake+Alice%22&jo=true&j=EP&j=JP&j=US&j=WO&st=false&n=50>Lake Alice\u003c/a>\u003c/b>","<b><a href=https://www.lens.org/lens/search?q=%22Tana+River%22&jo=true&j=EP&j=JP&j=US&j=WO&st=false&n=50>Tana River\u003c/a>\u003c/b>"],null,null,null,null]}],"limits":{"lat":[-3.35,3.5],"lng":[34.63003,40.43233]}},"evals":[],"jsHooks":[]}</script>
+<p>Ok we have the hyperlink working. At a more advanced stage we would probably want to add a set of hyperlinks that would direct the reader to a range of different data sources. For the moment we will stick with patents.</p>
+</div>
+<div id="sizing-the-markers" class="section level3">
+<h3>Sizing the markers</h3>
+<p>At the moment all of the markers are the same size. It would be useful if we could see the sizes based on for example the number of patent families (first filings) or the number of patent publications.</p>
+<pre class="r"><code>library(leaflet)
+lakes_data &lt;- leaflet(map_lakes_patents) %&gt;%
+  addTiles() %&gt;%  
+  addCircleMarkers(~longitude, ~latitude, popup = map_lakes_patents$map_labels, radius = map_lakes_patents$families, fillOpacity = 0.5, clusterOptions = markerClusterOptions())
+lakes_data</code></pre>
+<div id="htmlwidget-80442c7fdd3c2677f575" style="width:672px;height:480px;" class="leaflet html-widget"></div>
+<script type="application/json" data-for="htmlwidget-80442c7fdd3c2677f575">{"x":{"options":{"crs":{"crsClass":"L.CRS.EPSG3857","code":null,"proj4def":null,"projectedBounds":null,"options":{}}},"calls":[{"method":"addTiles","args":["//{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",null,null,{"minZoom":0,"maxZoom":18,"maxNativeZoom":null,"tileSize":256,"subdomains":"abc","errorTileUrl":"","tms":false,"continuousWorld":false,"noWrap":false,"zoomOffset":0,"zoomReverse":false,"opacity":1,"zIndex":null,"unloadInvisibleTiles":null,"updateWhenIdle":null,"detectRetina":false,"reuseTiles":false,"attribution":"&copy; <a href=\"http://openstreetmap.org\">OpenStreetMap\u003c/a> contributors, <a href=\"http://creativecommons.org/licenses/by-sa/2.0/\">CC-BY-SA\u003c/a>"}]},{"method":"addCircleMarkers","args":[[0.84633,-0.36845,0.6255,0.04768,3.5,-1.75517,-0.35703,-0.76732,-1.86667,0.26667,-2.10682,0.55502,-1.16667,-0.44015,-0.15,-0.7829,0.25886,-3.35,-0.07526,-2.59901],[36.12145,34.63003,40.31928,37.52809,36,36.27615,36.09297,36.35975,36.28333,36,36.40455,40.43233,37.33333,36.24272,37.31667,36.26233,36.10178,40.01667,37.46533,40.33862],[7,2,27,3,1,5,9,1,46,2,2,2,3,11,4,86,17,71,7,11],null,null,{"lineCap":null,"lineJoin":null,"clickable":true,"pointerEvents":null,"className":"","stroke":true,"color":"#03F","weight":5,"opacity":0.5,"fill":true,"fillColor":"#03F","fillOpacity":0.5,"dashArray":null},{"showCoverageOnHover":true,"zoomToBoundsOnClick":true,"spiderfyOnMaxZoom":true,"removeOutsideVisibleBounds":true,"spiderLegPolylineOptions":{"weight":1.5,"color":"#222","opacity":0.5},"freezeAtZoom":false},null,["<b><a href=https://www.lens.org/lens/search?q=%22Tilam%22&jo=true&j=EP&j=JP&j=US&j=WO&st=false&n=50>Tilam\u003c/a>\u003c/b>","<b><a href=https://www.lens.org/lens/search?q=%22Simbi+Lake%22&jo=true&j=EP&j=JP&j=US&j=WO&st=false&n=50>Simbi Lake\u003c/a>\u003c/b>","<b><a href=https://www.lens.org/lens/search?q=%22Sariba%22&jo=true&j=EP&j=JP&j=US&j=WO&st=false&n=50>Sariba\u003c/a>\u003c/b>","<b><a href=https://www.lens.org/lens/search?q=%22Sacred+Lake%22&jo=true&j=EP&j=JP&j=US&j=WO&st=false&n=50>Sacred Lake\u003c/a>\u003c/b>","<b><a href=https://www.lens.org/lens/search?q=%22Lake+Turkana%22&jo=true&j=EP&j=JP&j=US&j=WO&st=false&n=50>Lake Turkana\u003c/a>\u003c/b>","<b><a href=https://www.lens.org/lens/search?q=%22Nasikie+Engida%22&jo=true&j=EP&j=JP&j=US&j=WO&st=false&n=50>Nasikie Engida\u003c/a>\u003c/b>","<b><a href=https://www.lens.org/lens/search?q=%22Lake+Nakuru%22&jo=true&j=EP&j=JP&j=US&j=WO&st=false&n=50>Lake Nakuru\u003c/a>\u003c/b>","<b><a href=https://www.lens.org/lens/search?q=%22Lake+Naivasha%22&jo=true&j=EP&j=JP&j=US&j=WO&st=false&n=50>Lake Naivasha\u003c/a>\u003c/b>","<b><a href=https://www.lens.org/lens/search?q=%22Lake+Magadi%22&jo=true&j=EP&j=JP&j=US&j=WO&st=false&n=50>Lake Magadi\u003c/a>\u003c/b>","<b><a href=https://www.lens.org/lens/search?q=%22Kamarr%22&jo=true&j=EP&j=JP&j=US&j=WO&st=false&n=50>Kamarr\u003c/a>\u003c/b>","<b><a href=https://www.lens.org/lens/search?q=%22Kabongo%22&jo=true&j=EP&j=JP&j=US&j=WO&st=false&n=50>Kabongo\u003c/a>\u003c/b>","<b><a href=https://www.lens.org/lens/search?q=%22Halati%22&jo=true&j=EP&j=JP&j=US&j=WO&st=false&n=50>Halati\u003c/a>\u003c/b>","<b><a href=https://www.lens.org/lens/search?q=%22Enchanted+Lake%22&jo=true&j=EP&j=JP&j=US&j=WO&st=false&n=50>Enchanted Lake\u003c/a>\u003c/b>","<b><a href=https://www.lens.org/lens/search?q=%22Lake+Elmenteita%22&jo=true&j=EP&j=JP&j=US&j=WO&st=false&n=50>Lake Elmenteita\u003c/a>\u003c/b>","<b><a href=https://www.lens.org/lens/search?q=%22Curling+Pond%22&jo=true&j=EP&j=JP&j=US&j=WO&st=false&n=50>Curling Pond\u003c/a>\u003c/b>","<b><a href=https://www.lens.org/lens/search?q=%22Crater+Lake%22&jo=true&j=EP&j=JP&j=US&j=WO&st=false&n=50>Crater Lake\u003c/a>\u003c/b>","<b><a href=https://www.lens.org/lens/search?q=%22Lake+Bogoria%22&jo=true&j=EP&j=JP&j=US&j=WO&st=false&n=50>Lake Bogoria\u003c/a>\u003c/b>","<b><a href=https://www.lens.org/lens/search?q=%22Blue+Lagoon%22&jo=true&j=EP&j=JP&j=US&j=WO&st=false&n=50>Blue Lagoon\u003c/a>\u003c/b>","<b><a href=https://www.lens.org/lens/search?q=%22Lake+Alice%22&jo=true&j=EP&j=JP&j=US&j=WO&st=false&n=50>Lake Alice\u003c/a>\u003c/b>","<b><a href=https://www.lens.org/lens/search?q=%22Tana+River%22&jo=true&j=EP&j=JP&j=US&j=WO&st=false&n=50>Tana River\u003c/a>\u003c/b>"],null,null,null,null]}],"limits":{"lat":[-3.35,3.5],"lng":[34.63003,40.43233]}},"evals":[],"jsHooks":[]}</script>
+<p>We now have a map with labels, and hyperlinks that is sized on the raw number of families retrieved from the Lens.</p>
+</div>
+<div id="adding-more-data-to-the-labels" class="section level3">
+<h3>Adding more data to the labels</h3>
+<p>Going back to our earlier labels. The question now is whether we can add more labels to the map. Such as hyperlinks to look for the scientific literature.</p>
+<p>The answer lies with the label map function we created earlier. However, we will need to do a little preparation to format the labels for use in the urls. We will use a small function for this. The function could of course be expanded to other urls. Basically it will take a term (in this case it will be the asciiname) and format a URL for an exact match. <!--- should be able to use Purr and pmap here to add multiples and link to the label_map function using tags$---></p>
+<pre class="r"><code>map_url &lt;- function(query, label = &quot;NULL&quot;, type = &quot;NULL&quot;){
+href &lt;- &quot;&lt;a href=&quot;
+ close_href &lt;- &quot;&gt;&quot; #included for flexibility in labelling
+ close_a &lt;- &quot;&lt;/a&gt;&quot;
+  if(type == &quot;google&quot;){
+    query &lt;- stringr::str_replace_all(query, &quot; &quot;, &quot;+&quot;) 
+    google_base &lt;- &quot;https://www.google.co.uk/#q=&quot;
+    url &lt;- paste0(google_base, query)
+    out &lt;- paste0(href, shQuote(url), close_href, label, close_a)
+  }
+  if(type == &quot;crossref&quot;){
+    # example http://search.crossref.org/?q=%2Blake+%2Bbogoria
+    query &lt;- stringr::str_replace_all(query, &quot; &quot;, &quot;+%2B&quot;)
+    crossref_base &lt;- &quot;http://search.crossref.org/?q=%2B&quot;
+    url &lt;- paste0(crossref_base, query)
+    out &lt;- paste0(href, shQuote(url), close_href, label, close_a)
+  }
+  if(type == &quot;gbif&quot;){
+    # example http://www.gbif.org/species/search?q=Tamarix+africana
+    query &lt;- stringr::str_replace_all(query, &quot; &quot;, &quot;+&quot;)
+    gbif_base &lt;- &quot;http://www.gbif.org/species/search?q=&quot;
+    url &lt;- paste0(gbif_base, query)
+    out &lt;- paste0(href, shQuote(url), close_href, label, close_a)
+  }
+   if(type == &quot;lens&quot;){
+    # note restriction to main jurisdictions and no stemming to reduce duplication and false positives
+    query &lt;- stringr::str_replace_all(query, &quot; &quot;, &quot;+&quot;)
+    lens_base &lt;- &quot;https://www.lens.org/lens/search?q=&quot;
+    url &lt;- paste0(lens_base, &quot;%22&quot;, query, &quot;%22&quot;, &quot;&amp;jo=true&amp;j=EP&amp;j=JP&amp;j=US&amp;j=WO&amp;st=false&amp;n=50&quot;)
+    out &lt;- paste0(href, shQuote(url), close_href, label, close_a)
+   }
+out
+}</code></pre>
+<p>We can now add these to the map_lakes patents table as follows. Note that we will overwrite the existing patent links.</p>
+<pre class="r"><code>map_lakes_patents$google &lt;- map_url(map_lakes_patents$asciiname, label = &quot;Lookup Google&quot;, type = &quot;google&quot;)
+map_lakes_patents$crossref &lt;- map_url(map_lakes_patents$asciiname, label = &quot;Lookup Crossref&quot;, type = &quot;crossref&quot;)
+map_lakes_patents$lens &lt;- map_url(map_lakes_patents$asciiname, label = &quot;Lookup Patents&quot;, type = &quot;lens&quot;)</code></pre>
+<p>These now need combining into one field and we will use <code>sep=</code> to break the hyperlinks up. This is a little complicated and would merit a tidy up.</p>
+<pre class="r"><code>sep = &quot;&lt;br&gt;&quot;
+close_sep = &quot;&lt;/br&gt;&quot;
+str_open = &quot;&lt;strong&gt;&quot;
+str_close = &quot;&lt;/strong&gt;&quot;
+map_lakes_patents$combined_labels &lt;- paste0(sep, str_open, map_lakes_patents$asciiname, str_close, close_sep, sep, map_lakes_patents$lens, close_sep, sep, map_lakes_patents$google, close_sep, sep, map_lakes_patents$crossref, close_sep)</code></pre>
+<p>Let’s take a look.</p>
+<pre class="r"><code>library(leaflet)
+lakes_data &lt;- leaflet(map_lakes_patents) %&gt;%
+  addTiles() %&gt;%  
+  addCircleMarkers(~longitude, ~latitude, popup = map_lakes_patents$combined_labels, radius = map_lakes_patents$families, fillOpacity = 0.5, clusterOptions = markerClusterOptions())
+lakes_data</code></pre>
+<div id="htmlwidget-0b45852982b0bcfcdf49" style="width:672px;height:480px;" class="leaflet html-widget"></div>
+<script type="application/json" data-for="htmlwidget-0b45852982b0bcfcdf49">{"x":{"options":{"crs":{"crsClass":"L.CRS.EPSG3857","code":null,"proj4def":null,"projectedBounds":null,"options":{}}},"calls":[{"method":"addTiles","args":["//{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",null,null,{"minZoom":0,"maxZoom":18,"maxNativeZoom":null,"tileSize":256,"subdomains":"abc","errorTileUrl":"","tms":false,"continuousWorld":false,"noWrap":false,"zoomOffset":0,"zoomReverse":false,"opacity":1,"zIndex":null,"unloadInvisibleTiles":null,"updateWhenIdle":null,"detectRetina":false,"reuseTiles":false,"attribution":"&copy; <a href=\"http://openstreetmap.org\">OpenStreetMap\u003c/a> contributors, <a href=\"http://creativecommons.org/licenses/by-sa/2.0/\">CC-BY-SA\u003c/a>"}]},{"method":"addCircleMarkers","args":[[0.84633,-0.36845,0.6255,0.04768,3.5,-1.75517,-0.35703,-0.76732,-1.86667,0.26667,-2.10682,0.55502,-1.16667,-0.44015,-0.15,-0.7829,0.25886,-3.35,-0.07526,-2.59901],[36.12145,34.63003,40.31928,37.52809,36,36.27615,36.09297,36.35975,36.28333,36,36.40455,40.43233,37.33333,36.24272,37.31667,36.26233,36.10178,40.01667,37.46533,40.33862],[7,2,27,3,1,5,9,1,46,2,2,2,3,11,4,86,17,71,7,11],null,null,{"lineCap":null,"lineJoin":null,"clickable":true,"pointerEvents":null,"className":"","stroke":true,"color":"#03F","weight":5,"opacity":0.5,"fill":true,"fillColor":"#03F","fillOpacity":0.5,"dashArray":null},{"showCoverageOnHover":true,"zoomToBoundsOnClick":true,"spiderfyOnMaxZoom":true,"removeOutsideVisibleBounds":true,"spiderLegPolylineOptions":{"weight":1.5,"color":"#222","opacity":0.5},"freezeAtZoom":false},null,["<br><strong>Tilam\u003c/strong>\u003c/br><br><a href='https://www.lens.org/lens/search?q=%22Tilam%22&jo=true&j=EP&j=JP&j=US&j=WO&st=false&n=50'>Lookup Patents\u003c/a>\u003c/br><br><a href='https://www.google.co.uk/#q=Tilam'>Lookup Google\u003c/a>\u003c/br><br><a href='http://search.crossref.org/?q=%2BTilam'>Lookup Crossref\u003c/a>\u003c/br>","<br><strong>Simbi Lake\u003c/strong>\u003c/br><br><a href='https://www.lens.org/lens/search?q=%22Simbi+Lake%22&jo=true&j=EP&j=JP&j=US&j=WO&st=false&n=50'>Lookup Patents\u003c/a>\u003c/br><br><a href='https://www.google.co.uk/#q=Simbi+Lake'>Lookup Google\u003c/a>\u003c/br><br><a href='http://search.crossref.org/?q=%2BSimbi+%2BLake'>Lookup Crossref\u003c/a>\u003c/br>","<br><strong>Sariba\u003c/strong>\u003c/br><br><a href='https://www.lens.org/lens/search?q=%22Sariba%22&jo=true&j=EP&j=JP&j=US&j=WO&st=false&n=50'>Lookup Patents\u003c/a>\u003c/br><br><a href='https://www.google.co.uk/#q=Sariba'>Lookup Google\u003c/a>\u003c/br><br><a href='http://search.crossref.org/?q=%2BSariba'>Lookup Crossref\u003c/a>\u003c/br>","<br><strong>Sacred Lake\u003c/strong>\u003c/br><br><a href='https://www.lens.org/lens/search?q=%22Sacred+Lake%22&jo=true&j=EP&j=JP&j=US&j=WO&st=false&n=50'>Lookup Patents\u003c/a>\u003c/br><br><a href='https://www.google.co.uk/#q=Sacred+Lake'>Lookup Google\u003c/a>\u003c/br><br><a href='http://search.crossref.org/?q=%2BSacred+%2BLake'>Lookup Crossref\u003c/a>\u003c/br>","<br><strong>Lake Turkana\u003c/strong>\u003c/br><br><a href='https://www.lens.org/lens/search?q=%22Lake+Turkana%22&jo=true&j=EP&j=JP&j=US&j=WO&st=false&n=50'>Lookup Patents\u003c/a>\u003c/br><br><a href='https://www.google.co.uk/#q=Lake+Turkana'>Lookup Google\u003c/a>\u003c/br><br><a href='http://search.crossref.org/?q=%2BLake+%2BTurkana'>Lookup Crossref\u003c/a>\u003c/br>","<br><strong>Nasikie Engida\u003c/strong>\u003c/br><br><a href='https://www.lens.org/lens/search?q=%22Nasikie+Engida%22&jo=true&j=EP&j=JP&j=US&j=WO&st=false&n=50'>Lookup Patents\u003c/a>\u003c/br><br><a href='https://www.google.co.uk/#q=Nasikie+Engida'>Lookup Google\u003c/a>\u003c/br><br><a href='http://search.crossref.org/?q=%2BNasikie+%2BEngida'>Lookup Crossref\u003c/a>\u003c/br>","<br><strong>Lake Nakuru\u003c/strong>\u003c/br><br><a href='https://www.lens.org/lens/search?q=%22Lake+Nakuru%22&jo=true&j=EP&j=JP&j=US&j=WO&st=false&n=50'>Lookup Patents\u003c/a>\u003c/br><br><a href='https://www.google.co.uk/#q=Lake+Nakuru'>Lookup Google\u003c/a>\u003c/br><br><a href='http://search.crossref.org/?q=%2BLake+%2BNakuru'>Lookup Crossref\u003c/a>\u003c/br>","<br><strong>Lake Naivasha\u003c/strong>\u003c/br><br><a href='https://www.lens.org/lens/search?q=%22Lake+Naivasha%22&jo=true&j=EP&j=JP&j=US&j=WO&st=false&n=50'>Lookup Patents\u003c/a>\u003c/br><br><a href='https://www.google.co.uk/#q=Lake+Naivasha'>Lookup Google\u003c/a>\u003c/br><br><a href='http://search.crossref.org/?q=%2BLake+%2BNaivasha'>Lookup Crossref\u003c/a>\u003c/br>","<br><strong>Lake Magadi\u003c/strong>\u003c/br><br><a href='https://www.lens.org/lens/search?q=%22Lake+Magadi%22&jo=true&j=EP&j=JP&j=US&j=WO&st=false&n=50'>Lookup Patents\u003c/a>\u003c/br><br><a href='https://www.google.co.uk/#q=Lake+Magadi'>Lookup Google\u003c/a>\u003c/br><br><a href='http://search.crossref.org/?q=%2BLake+%2BMagadi'>Lookup Crossref\u003c/a>\u003c/br>","<br><strong>Kamarr\u003c/strong>\u003c/br><br><a href='https://www.lens.org/lens/search?q=%22Kamarr%22&jo=true&j=EP&j=JP&j=US&j=WO&st=false&n=50'>Lookup Patents\u003c/a>\u003c/br><br><a href='https://www.google.co.uk/#q=Kamarr'>Lookup Google\u003c/a>\u003c/br><br><a href='http://search.crossref.org/?q=%2BKamarr'>Lookup Crossref\u003c/a>\u003c/br>","<br><strong>Kabongo\u003c/strong>\u003c/br><br><a href='https://www.lens.org/lens/search?q=%22Kabongo%22&jo=true&j=EP&j=JP&j=US&j=WO&st=false&n=50'>Lookup Patents\u003c/a>\u003c/br><br><a href='https://www.google.co.uk/#q=Kabongo'>Lookup Google\u003c/a>\u003c/br><br><a href='http://search.crossref.org/?q=%2BKabongo'>Lookup Crossref\u003c/a>\u003c/br>","<br><strong>Halati\u003c/strong>\u003c/br><br><a href='https://www.lens.org/lens/search?q=%22Halati%22&jo=true&j=EP&j=JP&j=US&j=WO&st=false&n=50'>Lookup Patents\u003c/a>\u003c/br><br><a href='https://www.google.co.uk/#q=Halati'>Lookup Google\u003c/a>\u003c/br><br><a href='http://search.crossref.org/?q=%2BHalati'>Lookup Crossref\u003c/a>\u003c/br>","<br><strong>Enchanted Lake\u003c/strong>\u003c/br><br><a href='https://www.lens.org/lens/search?q=%22Enchanted+Lake%22&jo=true&j=EP&j=JP&j=US&j=WO&st=false&n=50'>Lookup Patents\u003c/a>\u003c/br><br><a href='https://www.google.co.uk/#q=Enchanted+Lake'>Lookup Google\u003c/a>\u003c/br><br><a href='http://search.crossref.org/?q=%2BEnchanted+%2BLake'>Lookup Crossref\u003c/a>\u003c/br>","<br><strong>Lake Elmenteita\u003c/strong>\u003c/br><br><a href='https://www.lens.org/lens/search?q=%22Lake+Elmenteita%22&jo=true&j=EP&j=JP&j=US&j=WO&st=false&n=50'>Lookup Patents\u003c/a>\u003c/br><br><a href='https://www.google.co.uk/#q=Lake+Elmenteita'>Lookup Google\u003c/a>\u003c/br><br><a href='http://search.crossref.org/?q=%2BLake+%2BElmenteita'>Lookup Crossref\u003c/a>\u003c/br>","<br><strong>Curling Pond\u003c/strong>\u003c/br><br><a href='https://www.lens.org/lens/search?q=%22Curling+Pond%22&jo=true&j=EP&j=JP&j=US&j=WO&st=false&n=50'>Lookup Patents\u003c/a>\u003c/br><br><a href='https://www.google.co.uk/#q=Curling+Pond'>Lookup Google\u003c/a>\u003c/br><br><a href='http://search.crossref.org/?q=%2BCurling+%2BPond'>Lookup Crossref\u003c/a>\u003c/br>","<br><strong>Crater Lake\u003c/strong>\u003c/br><br><a href='https://www.lens.org/lens/search?q=%22Crater+Lake%22&jo=true&j=EP&j=JP&j=US&j=WO&st=false&n=50'>Lookup Patents\u003c/a>\u003c/br><br><a href='https://www.google.co.uk/#q=Crater+Lake'>Lookup Google\u003c/a>\u003c/br><br><a href='http://search.crossref.org/?q=%2BCrater+%2BLake'>Lookup Crossref\u003c/a>\u003c/br>","<br><strong>Lake Bogoria\u003c/strong>\u003c/br><br><a href='https://www.lens.org/lens/search?q=%22Lake+Bogoria%22&jo=true&j=EP&j=JP&j=US&j=WO&st=false&n=50'>Lookup Patents\u003c/a>\u003c/br><br><a href='https://www.google.co.uk/#q=Lake+Bogoria'>Lookup Google\u003c/a>\u003c/br><br><a href='http://search.crossref.org/?q=%2BLake+%2BBogoria'>Lookup Crossref\u003c/a>\u003c/br>","<br><strong>Blue Lagoon\u003c/strong>\u003c/br><br><a href='https://www.lens.org/lens/search?q=%22Blue+Lagoon%22&jo=true&j=EP&j=JP&j=US&j=WO&st=false&n=50'>Lookup Patents\u003c/a>\u003c/br><br><a href='https://www.google.co.uk/#q=Blue+Lagoon'>Lookup Google\u003c/a>\u003c/br><br><a href='http://search.crossref.org/?q=%2BBlue+%2BLagoon'>Lookup Crossref\u003c/a>\u003c/br>","<br><strong>Lake Alice\u003c/strong>\u003c/br><br><a href='https://www.lens.org/lens/search?q=%22Lake+Alice%22&jo=true&j=EP&j=JP&j=US&j=WO&st=false&n=50'>Lookup Patents\u003c/a>\u003c/br><br><a href='https://www.google.co.uk/#q=Lake+Alice'>Lookup Google\u003c/a>\u003c/br><br><a href='http://search.crossref.org/?q=%2BLake+%2BAlice'>Lookup Crossref\u003c/a>\u003c/br>","<br><strong>Tana River\u003c/strong>\u003c/br><br><a href='https://www.lens.org/lens/search?q=%22Tana+River%22&jo=true&j=EP&j=JP&j=US&j=WO&st=false&n=50'>Lookup Patents\u003c/a>\u003c/br><br><a href='https://www.google.co.uk/#q=Tana+River'>Lookup Google\u003c/a>\u003c/br><br><a href='http://search.crossref.org/?q=%2BTana+%2BRiver'>Lookup Crossref\u003c/a>\u003c/br>"],null,null,null,null]}],"limits":{"lat":[-3.35,3.5],"lng":[34.63003,40.43233]}},"evals":[],"jsHooks":[]}</script>
+<p>We now have an interactive map with three working hyperlinks.</p>
+</div>
+</div>
+<div id="round-up" class="section level2">
+<h2>Round Up</h2>
+<p>In this section we have walked through the process of using the geonames service to develop search queries for a range of different data types (patents, the scientific literature, and google) and then created an interactive geographic map.</p>
+<p>Some elements of the piece require improvement, for example the patent search queries will generate significant noise on certain common names and the underlying search feature of <code>lensr</code> needs improvement. In addition, the process for generating the map hyperlinks could be tidied up (perhaps using htmltools). However, we now have a means of obtaining georeferences and then visually linking with other types of data.</p>
+</div>
+
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

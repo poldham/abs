@@ -1,0 +1,3 @@
+kenya_occurrence.rda is a subset of kenya_gbif.rda filtered by SPECIES and with NA removed from the decimallatitude and decimallongitude fields.
+
+Please cite as Oldham, Paul (2017) kenya occurrence dataset derived from doi:10.15468/dl.b04fyt.

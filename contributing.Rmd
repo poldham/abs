@@ -1,0 +1,26 @@
+---
+title: "Contributing"
+author: "Paul Oldham"
+date: "27 February 2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+This Handbook is being written in the open and it will be a lot better if you are willing to contribute. There are a number of ways that you can help. 
+
+1. If something doesn't make sense to you, or is hard to understand, then please let me know. I will then look at how to improve the explanation or have a rethink. 
+
+2. This handbook include chunks of code in R. All chunks will work but there may be better ways of achieving some of the tasks or errors that have not been spotted along the way. Your contributions to streamlining or improving code will be valuable and acknowledged. The Handbook uses a [tidyverse](http://tidyverse.org/) approach to writing code in R. If you know of another software tool, package or library that will do a job better then let me know as the Handbook is not exclusively about R.
+
+3. If you see a typo, please feel welcome to edit the page and then send a pull request on Github. This is easy to do. 
+
+a) Click the edit this page icon in the sidebar at the Github repository for the chapters. 
+
+b) Make your changes with the in-page editor and then Press the Propose Changes button.
+
+c) Submit a pull request and briefly descrive your changes (e.g. correcting a typo).
+
+If you make significant changes, include the phrase "I assign the copyright of this contribution to Paul Oldham" - This is needed to publish the printed book.

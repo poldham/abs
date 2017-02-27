@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+
+<meta name="author" content="Paul Oldham" />
+
+
+<title>Getting Started</title>
+
+<script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/bootstrap.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="site_libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
+<link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<link href="site_libs/highlightjs-1.1/default.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-1.1/highlight.js"></script>
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs && document.readyState && document.readyState === "complete") {
+   window.setTimeout(function() {
+      hljs.initHighlighting();
+   }, 0);
+}
+</script>
+
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+
+</head>
+
+<body>
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+  height: auto;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+</style>
+
+
+<style type="text/css">
+/* padding for bootstrap navbar */
+body {
+  padding-top: 51px;
+  padding-bottom: 40px;
+}
+/* offset scroll position for anchor links (for fixed navbar)  */
+.section h1 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+
+.section h2 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h3 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h4 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h5 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h6 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+</style>
+
+<script>
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark it active
+  menuAnchor.parent().addClass('active');
+
+  // if it's got a parent navbar menu mark it active as well
+  menuAnchor.closest('li.dropdown').addClass('active');
+});
+</script>
+
+
+<div class="container-fluid main-container">
+
+<!-- tabsets -->
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+</script>
+
+<!-- code folding -->
+
+
+
+
+<script>
+$(document).ready(function ()  {
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_').toLowerCase();
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+  padding-left: 25px;
+  text-indent: 0;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row-fluid">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">Handbook on ABS Monitoring</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">Introduction</a>
+</li>
+<li>
+  <a href="gettingstarted.html">Getting Started</a>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    Working with Taxonomic Data
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="gbif.html">Accessing GBIF</a>
+    </li>
+    <li>
+      <a href="mapgbif.html">Mapping GBIF Data</a>
+    </li>
+  </ul>
+</li>
+<li>
+  <a href="crossref.html">Accessing Scientific Literature</a>
+</li>
+<li>
+  <a href="geonames.html">Mapping with Geonames</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div class="fluid-row" id="header">
+
+
+
+<h1 class="title toc-ignore">Getting Started</h1>
+<h4 class="author"><em>Paul Oldham</em></h4>
+
+</div>
+
+
+<div id="introduction" class="section level3">
+<h3>Introduction</h3>
+<p>The Handbook for Monitoring Access and Benefit-Sharing makes extensive use of RStudio and R packages for tasks such as accessing web services for taxonomic data, the scientific literature and patents.</p>
+<p>R is a statistical programming language and if you are not familiar with programming then that may sound somewhat intimidating. However, you do not need to learn R to be able to use it for ABS monitoring. At its most basic R should be seen as a platform for accessing a wide variety of different data sources. All that is required is that you learn the basic tasks involved in accessing data. At a more advanced level R is a sophisticated platform for cleaning, combining, analysing and visualizing data. You can also link R with a range of databases and other programming languages such as Python.</p>
+</div>
+<div id="installing-r-and-rstudio" class="section level3">
+<h3>Installing R and RStudio</h3>
+<p>To begin you need to install R for your operating system by visiting this <a href="http://cran.rstudio.com/">link</a>.</p>
+<div class="figure">
+<img src="images/rstudio/general.png" />
+
+</div>
+<p>Select the link for your operating system. If you have a Mac choose the first option on the Mac page.</p>
+<div class="figure">
+<img src="images/rstudio/mac.png" />
+
+</div>
+<p>When the file has downloaded make sure that you install it.</p>
+<p>If you are on Windows and you have not previously installed R choose the <a href="https://cran.rstudio.com/bin/windows/base/">base option</a> from <a href="https://cran.rstudio.com">the page below</a>.</p>
+<div class="figure">
+<img src="images/rstudio/windows.png" />
+
+</div>
+<p>When you have downloaded base make sure that you install it.</p>
+</div>
+<div id="install-rstudio" class="section level3">
+<h3>Install RStudio</h3>
+<p>Rstudio is a free user interface for R that makes it much easier to use R and to publish your work as a Word document, a PDF, a blog, a website or an electronic book.</p>
+<p>We will use the free version of RStudio that can be downloaded <a href="https://www.rstudio.com/products/rstudio/download/">here</a>. Look towards the bottom of the page and download RStudio for your system.</p>
+<div class="figure">
+<img src="images/rstudio/rstudio.png" />
+
+</div>
+<p>When you have downloaded RStudio open it.</p>
+</div>
+<div id="installing-packages" class="section level3">
+<h3>Installing Packages</h3>
+<p>R and RStudio work with functions that are bundled into packages or libraries. There are now over 10,000 packages that have been built and submitted by users to the <a href="https://cran.r-project.org">Comprehensive R Archive Network or CRAN</a>. To get an idea of the range of packages you can take a look at the CRAN task page which provides summaries of packages that have been developed to address tasks such as text mining (natural language processing).</p>
+<div class="figure">
+<img src="images/rstudio/tasks.png" />
+
+</div>
+<p>For monitoring access and benefit-sharing we need to use a relatively small number of packages. Copy the code below and paste it into your console in RStudio and then press Enter.</p>
+<pre class="r"><code>install.packages(&quot;tidyverse&quot;) # data manipulation
+install.packages(&quot;leaflet&quot;) # mapping
+install.packages(&quot;rgbif&quot;) # taxonomic data
+install.packages(&quot;rcrossref&quot;) # scientific literature
+install.packages(&quot;rorcid&quot;) # researcher identifiers
+install.packages(&quot;devtools&quot;) # utilities</code></pre>
+<p>As the packages install they will also download any other packages they need to work. This might take some time.</p>
+<p>Not all packages are available on CRAN but you can download and install them from Github.</p>
+<p>In the code below we want to install the <code>lensr</code> package to provide access to the patent data from the Lens directly in R. Copy and paste the code below into the RStudio console and press Enter.</p>
+<pre class="r"><code>devtools::install_github(&quot;poldham/lensr&quot;)</code></pre>
+<p>That is everything you need to get started with ABS monitoring in Rstudio.</p>
+</div>
+<div id="download-the-handbook" class="section level3">
+<h3>Download the Handbook</h3>
+<p>You can download the entire Handbook as a .zip file from <a href="https://github.com/poldham/abs/archive/master.zip">here</a>. Note that at the time of writing the project is 283MB in size and so it may take some time depending on your wifi connection. After unzipping the file look for a file name <code>abs.Rproj</code> and open it with RStudio.</p>
+<p>You have now opened the RStudio project file that contains all the documents and data used in the Handbook.</p>
+</div>
+<div id="working-with-files" class="section level3">
+<h3>Working with Files</h3>
+<p>The Handbook is written in RMarkdown. Rmarkdown files are basically simple text files with added <code>chunks</code> containing code and instructions. Each chapter in the handbook is found in a file that ends with .Rmd for Rmarkdown. If you open this file (<code>gettingstarted.Rmd</code>) in RStudio you will see a set of greyed boxes containing code with a green arrow at the end as in the image below.</p>
+<div class="figure">
+<img src="images/rstudio/chunk.png" />
+
+</div>
+<p>Clicking on an arrow will run the code inside that chunk. This means that any chunk of code in the Handbook can be run and it will work (note that the order of the chunks is important). The significance of this is that you are provided with all of the functioning code that will allow you to reproduce the data in the Handbook and adapt it for your specific needs.</p>
+<p>To learn more about Rmarkdown see the <a href="http://rmarkdown.rstudio.com/lesson-1.html">Rmarkdown tutorial</a></p>
+</div>
+<div id="learning-more" class="section level3">
+<h3>Learning More</h3>
+<p>Everything that you will need to know about R for ABS Monitoring is in the Handbook. However, it is a good idea to learn more about R as one of the most popular programming languages for data analysis. The good news is that there are lots of resources for learning more about R. Probably the best place to start is the detailed R</p>
+<p><a href="https://www.rstudio.com/online-learning/#R">Rstudio resources</a> <a href="https://www.datacamp.com/">Datacamp</a> <a href="https://www.r-bloggers.com/">R-bloggers</a></p>
+<p>If you get stuck (and everyone does) then answers to questions <a href="http://stackoverflow.com/questions/tagged/r">Stack Overflow</a> will often provide a solution to your problem.</p>
+</div>
+
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

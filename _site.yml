@@ -1,0 +1,20 @@
+name: "my-website"
+navbar:
+  title: "Handbook on ABS Monitoring"
+  left:
+    - text: "Introduction"
+      href: index.html
+    - text: "Getting Started"
+      href: gettingstarted.html
+    - text: "Working with Taxonomic Data"  
+      menu:
+        - text: "Accessing GBIF"
+          href: gbif.html
+        - text: "Mapping GBIF Data"
+          href: mapgbif.html 
+    - text: "Accessing Scientific Literature"
+      href: crossref.html 
+    - text: "Mapping with Geonames"
+      href: geonames.html
+
+output_dir: "."

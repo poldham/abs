@@ -1,0 +1,104 @@
+---
+title: "Getting Started"
+author: "Paul Oldham"
+output: 
+  html_document:
+    toc: true
+    depth: 3
+    toc_float: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+### Introduction
+
+The Handbook for Monitoring Access and Benefit-Sharing makes extensive use of RStudio and R packages for tasks such as accessing web services for taxonomic data, the scientific literature and patents. 
+
+R is a statistical programming language and if you are not familiar with programming then that may sound somewhat intimidating. However, you do not need to learn R to be able to use it for ABS monitoring. At its most basic R should be seen as a platform for accessing a wide variety of different data sources. All that is required is that you learn the basic tasks involved in accessing data. At a more advanced level R is a sophisticated platform for cleaning, combining, analysing and visualizing data. You can also link R with a range of databases and other programming languages such as Python.
+
+### Installing R and RStudio
+
+To begin you need to install R for your operating system by visiting this [link](http://cran.rstudio.com/). 
+
+![](/Users/pauloldham17inch/Desktop/open_source_master/abs/images/rstudio/general.png)
+
+Select the link for your operating system. If you have a Mac choose the first option on the Mac page.
+
+![](/Users/pauloldham17inch/Desktop/open_source_master/abs/images/rstudio/mac.png)
+
+When the file has downloaded make sure that you install it. 
+
+If you are on Windows and you have not previously installed R choose the [base option](https://cran.rstudio.com/bin/windows/base/) from [the page below](https://cran.rstudio.com).
+
+![](/Users/pauloldham17inch/Desktop/open_source_master/abs/images/rstudio/windows.png)
+
+When you have downloaded base make sure that you install it.
+
+### Install RStudio
+
+Rstudio is a free user interface for R that makes it much easier to use R and to publish your work as a Word document, a PDF, a blog, a website or an electronic book.
+
+We will use the free version of RStudio that can be downloaded [here](https://www.rstudio.com/products/rstudio/download/). Look towards the bottom of the page and download RStudio for your system. 
+
+![](/Users/pauloldham17inch/Desktop/open_source_master/abs/images/rstudio/rstudio.png)
+
+
+When you have downloaded RStudio open it.
+
+###Installing Packages
+
+R and RStudio work with functions that are bundled into packages or libraries. There are now over 10,000 packages that have been built and submitted by users to the [Comprehensive R Archive Network or CRAN](https://cran.r-project.org). To get an idea of the range of packages you can take a look at the CRAN task page which provides summaries of packages that have been developed to address tasks such as text mining (natural language processing).
+
+![](/Users/pauloldham17inch/Desktop/open_source_master/abs/images/rstudio/tasks.png)
+
+
+For monitoring access and benefit-sharing we need to use a relatively small number of packages. Copy the code below and paste it into your console in RStudio and then press Enter. 
+
+```{r install, eval=FALSE}
+install.packages("tidyverse") # data manipulation
+install.packages("leaflet") # mapping
+install.packages("rgbif") # taxonomic data
+install.packages("rcrossref") # scientific literature
+install.packages("rorcid") # researcher identifiers
+install.packages("devtools") # utilities
+```
+
+As the packages install they will also download any other packages they need to work. This might take some time. 
+
+Not all packages are available on CRAN but you can download and install them from Github.
+
+In the code below we want to install the `lensr` package to provide access to the patent data from the Lens directly in R. Copy and paste the code below into the RStudio console and press Enter. 
+
+```{r install_github, eval=FALSE}
+devtools::install_github("poldham/lensr")
+```
+
+That is everything you need to get started with ABS monitoring in Rstudio. 
+
+### Download the Handbook
+
+You can download the entire Handbook as a .zip file from [here](https://github.com/poldham/abs/archive/master.zip). Note that at the time of writing the project is 283MB in size and so it may take some time depending on your wifi connection. After unzipping the file look for a file name `abs.Rproj` and open it with RStudio.
+
+You have now opened the RStudio project file that contains all the documents and data used in the Handbook. 
+
+### Working with Files
+
+The Handbook is written in RMarkdown. Rmarkdown files are basically simple text files with added `chunks` containing code and instructions. Each chapter in the handbook is found in a file that ends with .Rmd for Rmarkdown. If you open this file (`gettingstarted.Rmd`) in RStudio you will see a set of greyed boxes containing code with a green arrow at the end as in the image below. 
+
+![](/Users/pauloldham17inch/Desktop/open_source_master/abs/images/rstudio/chunk.png)
+
+Clicking on an arrow will run the code inside that chunk. This means that any chunk of code in the Handbook can be run and it will work (note that the order of the chunks is important). The significance of this is that you are provided with all of the functioning code that will allow you to reproduce the data in the Handbook and adapt it for your specific needs.
+
+To learn more about Rmarkdown see the [Rmarkdown tutorial](http://rmarkdown.rstudio.com/lesson-1.html)
+
+### Learning More
+
+Everything that you will need to know about R for ABS Monitoring is in the Handbook. However, it is a good idea to learn more about R as one of the most popular programming languages for data analysis. The good news is that there are lots of resources for learning more about R. Probably the best place to start is the detailed R
+
+[Rstudio resources](https://www.rstudio.com/online-learning/#R)
+[Datacamp](https://www.datacamp.com/)
+[R-bloggers](https://www.r-bloggers.com/)
+
+If you get stuck (and everyone does) then answers to questions [Stack Overflow](http://stackoverflow.com/questions/tagged/r) will often provide a solution to your problem. 

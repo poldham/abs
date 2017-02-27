@@ -1,0 +1,11 @@
+base
+rcrossref
+tidyverse
+ggplot2
+tibble
+tidyr
+readr
+purrr
+dplyr
+stringr
+plotly
