@@ -1,11 +1,13 @@
 name: "my-website"
 navbar:
   title: "ABS Monitoring"
-  left:
-    - text: "Introduction"
-      href: index.html
-    - text: "Getting Started"
-      href: gettingstarted.html
+  right:
+    - text: "Get Started"
+      menu:  
+        - text: "Introduction"
+          href: index.html
+        - text: "Getting Started"
+          href: gettingstarted.html
     - text: "Taxonomic Data"  
       menu:
         - text: "Accessing GBIF"
