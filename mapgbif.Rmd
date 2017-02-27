@@ -217,7 +217,7 @@ Next, and optionally, run the test files below (generating a lot of returns and 
 source(system.file("tests","testing.R", package="geonames"), echo=TRUE)
 ```
 
-To get the boundaries for a country we need to access the country info. The data that we are after is on this [page](http://api.geonames.org/countryInfo?username=demo)
+To get the boundaries for a country we need to access the country info. The data that we are after is on this [page](http://api.geonames.org/countryInfo?username=demo).
 
 To access that information with the geonames package we use the two letter [country code from here](http://www.geonames.org/countries/) or, if you are planning to do a lot of work with country codes, see the useful [countrycode](https://github.com/vincentarelbundock/countrycode) package: 
 
@@ -475,28 +475,28 @@ ColorBrewer contains three types of palette:
 
 It is the qualitative (categorical) palettes that we want, to give distinct colors to our kingdoms. The qualitative palettes are:
 
-Accent	8
-Dark2	8
-Paired	12
-Pastel1	9
-Pastel2	8
-Set1	9
-Set2	8
-Set3	12
+- Accent	8
+- Dark2	8
+- Paired	12
+- Pastel1	9
+- Pastel2	8
+- Set1	9
+- Set2	8
+- Set3	12
 
 If we visit the color brewer website we can test out the colors across the three types. The name of the palette appears in the URL based on your choices, for example: [http://colorbrewer2.org/#type=qualitative&scheme=Paired&n=7](http://colorbrewer2.org/#type=qualitative&scheme=Paired&n=7)
 
 We need to define the categories that will be used for the colours. In this case we will want to colour by kingdom. But bear in mind that an individual dataset may not include all of the kingdoms used in the [GBIF taxomony](http://www.gbif.org/dataset/d7dddbf4-2cf0-4f39-9b2a-bb099caae36c). The Kingdoms used in GBIF are:
 
-Animalia
-Archaea
-Bacteria
-Chromista
-Fungi
-incertae sedis
-Plantae
-Protozoa
-Viruses
+- Animalia
+- Archaea
+- Bacteria
+- Chromista
+- Fungi
+- incertae sedis
+- Plantae
+- Protozoa
+- Viruses
 
 So, for use across multiple datasets we will want 9 colour categories. A colour will be allocated to NA (Not Available) by default and so we do not need to worry about that. 
 

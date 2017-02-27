@@ -522,7 +522,7 @@ species</code></pre>
 options(geonamesUsername = &quot;yourusername&quot;)</code></pre>
 <p>Next, and optionally, run the test files below (generating a lot of returns and not shown) to check that you can access the service.</p>
 <pre class="r"><code>source(system.file(&quot;tests&quot;, &quot;testing.R&quot;, package = &quot;geonames&quot;), echo = TRUE)</code></pre>
-<p>To get the boundaries for a country we need to access the country info. The data that we are after is on this <a href="http://api.geonames.org/countryInfo?username=demo">page</a></p>
+<p>To get the boundaries for a country we need to access the country info. The data that we are after is on this <a href="http://api.geonames.org/countryInfo?username=demo">page</a>.</p>
 <p>To access that information with the geonames package we use the two letter <a href="http://www.geonames.org/countries/">country code from here</a> or, if you are planning to do a lot of work with country codes, see the useful <a href="https://github.com/vincentarelbundock/countrycode">countrycode</a> package:</p>
 <pre class="r"><code>kenya_geonames_info &lt;- GNcountryInfo(country = &quot;KE&quot;)
 kenya_geonames_info</code></pre>
@@ -697,10 +697,29 @@ map</code></pre>
 <li><a href="http://colorbrewer2.org/#type=qualitative&amp;scheme=Accent&amp;n=3">Qualitative</a></li>
 </ol>
 <p>It is the qualitative (categorical) palettes that we want, to give distinct colors to our kingdoms. The qualitative palettes are:</p>
-<p>Accent 8 Dark2 8 Paired 12 Pastel1 9 Pastel2 8 Set1 9 Set2 8 Set3 12</p>
+<ul>
+<li>Accent 8</li>
+<li>Dark2 8</li>
+<li>Paired 12</li>
+<li>Pastel1 9</li>
+<li>Pastel2 8</li>
+<li>Set1 9</li>
+<li>Set2 8</li>
+<li>Set3 12</li>
+</ul>
 <p>If we visit the color brewer website we can test out the colors across the three types. The name of the palette appears in the URL based on your choices, for example: <a href="http://colorbrewer2.org/#type=qualitative&amp;scheme=Paired&amp;n=7" class="uri">http://colorbrewer2.org/#type=qualitative&amp;scheme=Paired&amp;n=7</a></p>
 <p>We need to define the categories that will be used for the colours. In this case we will want to colour by kingdom. But bear in mind that an individual dataset may not include all of the kingdoms used in the <a href="http://www.gbif.org/dataset/d7dddbf4-2cf0-4f39-9b2a-bb099caae36c">GBIF taxomony</a>. The Kingdoms used in GBIF are:</p>
-<p>Animalia Archaea Bacteria Chromista Fungi incertae sedis Plantae Protozoa Viruses</p>
+<ul>
+<li>Animalia</li>
+<li>Archaea</li>
+<li>Bacteria</li>
+<li>Chromista</li>
+<li>Fungi</li>
+<li>incertae sedis</li>
+<li>Plantae</li>
+<li>Protozoa</li>
+<li>Viruses</li>
+</ul>
 <p>So, for use across multiple datasets we will want 9 colour categories. A colour will be allocated to NA (Not Available) by default and so we do not need to worry about that.</p>
 <p>With <code>leaflet</code> we can preview the colours we want to apply to our categorical data. This works better run in the console than in an Rmarkdown document.</p>
 <pre class="r"><code>library(RColorBrewer)
