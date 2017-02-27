@@ -909,7 +909,7 @@ server &lt;- function(input, output){
   # R code that reacts to user inputs
   }
 
-#shinyApp(ui = ui, server = server) # commented out</code></pre>
+#shinyApp(ui = ui, server = server) # uncomment to run</code></pre>
 <p>Shiny Apps come in two formats, the single page format (as above) and a two script format (ui.R and server.R) format. To learn Shiny it is easier to use the single page format to have the inputs and outputs on the same page.</p>
 <p>One important rule of thumb is that code that only needs to run once should go outside the ui and server code (e.g. below where you run load any libraries). Code that will need to be recalculated (such as selecting Plants rather than Animalia) should go inside the code.</p>
 <p>In the app below we start off by loading the libraries and then taking the code we have developed earlier in the article (the code that performs calculations and processes the data). This is followed by a basic responsive ui consisting of a slider and a download button and some narrative text.</p>
@@ -1020,62 +1020,56 @@ ui &lt;- fluidPage(
 <p>Finally, we have the server that reacts to the inputs in the ui</p>
 <pre class="r"><code># server controls
 
-#server &lt;- function(input, output){
-  output$kenya_output &lt;- renderUI({
-    selectInput(inputId = &quot;kingdom_input&quot;, &quot;kingdom&quot;,
-      sort(unique(data$kingdom)),
-      selected = &quot;Animalia&quot;)
-  })
-  # use renderLeaflet for elements of the map that don&#39;t change, note setting default sizes
-  
-  output$mymap &lt;- renderLeaflet({
-    leaflet(data) %&gt;% 
-      addTiles() %&gt;%
-      addCircleMarkers(~longitude, ~latitude, popup = data$species, radius = 2, weight = 5, opacity = 0.5, fill= TRUE, fillOpacity = 0.2)
-  })
-  
-  # Use leafletProxy for elements that change
-  
-  observe({
-    set &lt;- data %&gt;% 
-      filter(data$kingdom %in% input$kingdom_input)
+server &lt;- function(input, output) {
+    output$kenya_output &lt;- renderUI({
+        selectInput(inputId = &quot;kingdom_input&quot;, &quot;kingdom&quot;, sort(unique(data$kingdom)), 
+            selected = &quot;Animalia&quot;)
+    })
+    # use renderLeaflet for elements of the map that don&#39;t change, note setting
+    # default sizes
     
-    leafletProxy(&quot;mymap&quot;) %&gt;% clearMarkers() %&gt;% 
-      addCircleMarkers(lng = set$longitude,
-        lat = set$latitude, popup = data$combined_label, radius = 1, weight = 2, opacity = 0.5, fill= TRUE, fillOpacity = 0.2, color = factpal(input$kingdom_input))
-  })
-  
-  # Add the table
-  
-  output$table &lt;- renderDataTable({
-    table &lt;- data %&gt;% 
-      filter(data$kingdom %in% input$kingdom_input) 
-  })
-
-  # Add summary plot counting species by occurrences. filter(n &gt; 10) to limit swamping the chart. Note that the n value filter will often need adjustment for the dataset. Probably better to adjust to select just the top 20 rows here. 
-  
-  output$summary &lt;- renderPlot({
-    data %&gt;% 
-      filter(data$kingdom %in% input$kingdom_input) %&gt;% 
-      count(species) %&gt;%
-      dplyr::filter(n &gt; 100) %&gt;%
-      ggplot(aes(x = reorder(species, n), y = n, fill = species)) +
-      geom_bar(stat=&quot;identity&quot;, show.legend = FALSE) +
-      coord_flip() + labs(x = &quot;species&quot;, y = &quot;occurrences&quot;) 
-  })
-  
-  # Add the download file details
-  output$downloadData &lt;- downloadHandler(
-    filename = function() {
-      paste(&quot;kenya_slim&quot;, &quot;.csv&quot;, sep=&quot;&quot;)
-    },
-    content = function(file) {
-      file.copy(&quot;kenya_slim.csv&quot;, file)
-    }, contentType = &quot;text/csv&quot;
-  )
+    output$mymap &lt;- renderLeaflet({
+        leaflet(data) %&gt;% addTiles() %&gt;% addCircleMarkers(~longitude, ~latitude, 
+            popup = data$species, radius = 2, weight = 5, opacity = 0.5, fill = TRUE, 
+            fillOpacity = 0.2)
+    })
+    
+    # Use leafletProxy for elements that change
+    
+    observe({
+        set &lt;- data %&gt;% filter(data$kingdom %in% input$kingdom_input)
+        
+        leafletProxy(&quot;mymap&quot;) %&gt;% clearMarkers() %&gt;% addCircleMarkers(lng = set$longitude, 
+            lat = set$latitude, popup = data$combined_label, radius = 1, weight = 2, 
+            opacity = 0.5, fill = TRUE, fillOpacity = 0.2, color = factpal(input$kingdom_input))
+    })
+    
+    # Add the table
+    
+    output$table &lt;- renderDataTable({
+        table &lt;- data %&gt;% filter(data$kingdom %in% input$kingdom_input)
+    })
+    
+    # Add summary plot counting species by occurrences. filter(n &gt; 100) to limit
+    # swamping the chart. Note that the n value filter will often need
+    # adjustment. Probably better to adjust to just slice the top 20 rows here.
+    
+    output$summary &lt;- renderPlot({
+        data %&gt;% filter(data$kingdom %in% input$kingdom_input) %&gt;% count(species) %&gt;% 
+            dplyr::filter(n &gt; 100) %&gt;% ggplot(aes(x = reorder(species, n), y = n, 
+            fill = species)) + geom_bar(stat = &quot;identity&quot;, show.legend = FALSE) + 
+            coord_flip() + labs(x = &quot;species&quot;, y = &quot;occurrences&quot;)
+    })
+    
+    # Add the download file details
+    output$downloadData &lt;- downloadHandler(filename = function() {
+        paste(&quot;kenya_slim&quot;, &quot;.csv&quot;, sep = &quot;&quot;)
+    }, content = function(file) {
+        file.copy(&quot;kenya_slim.csv&quot;, file)
+    }, contentType = &quot;text/csv&quot;)
 }
 
-#shinyApp(ui = ui, server = server)</code></pre>
+# shinyApp(ui = ui, server = server)</code></pre>
 </div>
 </div>
 <div id="roundup" class="section level2">

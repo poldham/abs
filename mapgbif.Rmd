@@ -749,7 +749,7 @@ server <- function(input, output){
   # R code that reacts to user inputs
   }
 
-#shinyApp(ui = ui, server = server) # commented out
+#shinyApp(ui = ui, server = server) # uncomment to run
 ```
 
 Shiny Apps come in two formats, the single page format (as above) and a two script format (ui.R and server.R) format. To learn Shiny it is easier to use the single page format to have the inputs and outputs on the same page.
@@ -875,7 +875,7 @@ Finally, we have the server that reacts to the inputs in the ui
 ```{r server, eval=FALSE}
 # server controls
 
-#server <- function(input, output){
+server <- function(input, output){
   output$kenya_output <- renderUI({
     selectInput(inputId = "kingdom_input", "kingdom",
       sort(unique(data$kingdom)),
@@ -907,7 +907,7 @@ Finally, we have the server that reacts to the inputs in the ui
       filter(data$kingdom %in% input$kingdom_input) 
   })
 
-  # Add summary plot counting species by occurrences. filter(n > 10) to limit swamping the chart. Note that the n value filter will often need adjustment for the dataset. Probably better to adjust to select just the top 20 rows here. 
+  # Add summary plot counting species by occurrences. filter(n > 100) to limit swamping the chart. Note that the n value filter will often need adjustment. Probably better to adjust to just slice the top 20 rows here. 
   
   output$summary <- renderPlot({
     data %>% 
