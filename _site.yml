@@ -6,15 +6,15 @@ navbar:
       href: index.html
     - text: "Getting Started"
       href: gettingstarted.html
-    - text: "Working with Taxonomic Data"  
+    - text: "Taxonomic Data"  
       menu:
         - text: "Accessing GBIF"
           href: gbif.html
         - text: "Mapping GBIF Data"
           href: mapgbif.html 
-    - text: "Accessing Scientific Literature"
+    - text: "Scientific Literature"
       href: crossref.html 
-    - text: "Mapping with Geonames"
+    - text: "Geographic Names"
       href: geonames.html
 
 output_dir: "."
