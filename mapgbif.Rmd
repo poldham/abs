@@ -57,7 +57,7 @@ Let's try to visualize some GBIF data occurrence data. For this test we will use
 
 An earlier article walked through the process of downloading an occurrence dataset from GBIF and then cleaning up the data to remove those records that do not contain coordinate data. You can find that article [here](https://poldham.github.io/abs/gbif.html).
 
-The file containing those results can be found on [Github here]() ADD. 
+The file containing those results can be found on [Github here](https://github.com/poldham/abs/raw/master/data/kenya_occurrence.rda). 
 
 ```{r load_occurrence}
 load("data/kenya_occurrence.rda")
